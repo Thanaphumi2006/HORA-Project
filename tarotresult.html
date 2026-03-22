@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>HORA – Card Prediction</title>
   <link href="https://fonts.googleapis.com/css2?family=Encode+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
 
@@ -166,6 +167,40 @@
     }
     .btn-home:hover { background:rgba(61,144,147,0.4); }
 
+    .email-section {
+      margin: 16px 24px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-send-email {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: rgba(2, 153, 177, 0.15);
+      border: 1.5px solid rgba(2, 153, 177, 0.45);
+      border-radius: 50px;
+      padding: 14px;
+      font-family: 'Encode Sans SC', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      color: #0299b1;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, opacity 0.2s;
+    }
+    .btn-send-email:hover    { background: rgba(2, 153, 177, 0.28); }
+    .btn-send-email:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-send-email svg { width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round; }
+    .email-status { font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(29,110,113,0.85);text-align:center; }
+    .email-status.success { color:#2d8a5e; }
+    .email-status.error   { color:#c0392b; }
+    .email-log { margin-top:4px;font-size:10px;letter-spacing:1px;color:rgba(29,110,113,0.65);text-align:center; }
+
     @keyframes pageIn { from { opacity: 0; } to { opacity: 1; } }
     body { animation: pageIn 0.35s ease both; }
     body.page-out { opacity: 0 !important; transition: opacity 0.25s ease !important; animation: none !important; }
@@ -193,11 +228,34 @@
 
   <a class="btn-home" id="homeBtn" href="home.html">Back to Home</a>
 
+  <!-- Email Results -->
+  <div class="email-section">
+    <button class="btn-send-email" id="btnSendEmail">
+      <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+      Email My Results
+    </button>
+    <div class="email-status" id="emailStatus"></div>
+    <div class="email-log"   id="emailLog"></div>
+  </div>
+
   <script>
     function navigate(url) {
       document.body.classList.add('page-out');
       setTimeout(() => { window.location.href = url; }, 260);
     }
+
+    // ── EmailJS Configuration ──────────────────────────────────────────────
+    // 1. Sign up free at https://emailjs.com
+    // 2. Add a Gmail service → copy the Service ID below
+    // 3. Create a template with variables: {{to_name}}, {{to_email}},
+    //    {{subject}}, {{zodiac}}, {{sent_date}}, {{content}}
+    //    → copy the Template ID below
+    // 4. Go to Account → API Keys → copy your Public Key below
+    const EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';
+    const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';
+    const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';
+    const EMAILJS_READY = EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY';
+    // ──────────────────────────────────────────────────────────────────────
 
     // ── Same deck data ──
     const BASE_W = 'https://upload.wikimedia.org/wikipedia/commons/';
@@ -338,6 +396,109 @@
       `;
       list.appendChild(row);
     });
+
+    // ── Email log helpers ────────────────────────────────────────────────
+    const LOG_KEY = 'hora_email_log';
+
+    function recordSent(email) {
+      const log = JSON.parse(localStorage.getItem(LOG_KEY) || '[]');
+      log.push({ type: 'tarot', email, date: new Date().toISOString() });
+      localStorage.setItem(LOG_KEY, JSON.stringify(log));
+    }
+
+    function getLastSent() {
+      const log = JSON.parse(localStorage.getItem(LOG_KEY) || '[]');
+      return log.filter(e => e.type === 'tarot').slice(-1)[0] || null;
+    }
+
+    function buildTarotEmail() {
+      const bannerName = document.getElementById('bannerName').textContent;
+      const bannerText = document.getElementById('bannerText').textContent;
+      const rows = [...document.querySelectorAll('.result-row')];
+      const cardLines = rows.map(row => {
+        const n = row.querySelector('.meaning-name')?.textContent || '';
+        const t = row.querySelector('.meaning-type')?.textContent || '';
+        const u = row.querySelector('.meaning-text')?.textContent || '';
+        return `${n} (${t})\n  ${u}`;
+      }).join('\n\n');
+      return `HORA TAROT READING\n` +
+             `══════════════════════════════\n` +
+             `Name: ${name || 'You'}  |  Zodiac: ${zodiac}\n` +
+             `Date: ${new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}\n\n` +
+             `YOUR RULING CARD\n───────────────\n${bannerName}\n${bannerText}\n\n` +
+             `YOUR SELECTED CARDS\n───────────────────\n${cardLines}\n\n` +
+             `──────────────────────────────\nSent by HORA · Predicting ur Destiny\nhttps://thanaphumi2006.github.io/HORA-Project/`;
+    }
+
+    function sendToEmail() {
+      const userEmail = sessionStorage.getItem('hora_email') || '';
+      if (!userEmail) {
+        document.getElementById('emailStatus').textContent = 'No email found — please sign in again.';
+        document.getElementById('emailStatus').className = 'email-status error';
+        return;
+      }
+
+      const btn = document.getElementById('btnSendEmail');
+      btn.disabled = true;
+      btn.innerHTML = `<svg viewBox="0 0 24 24" style="animation:spin 1s linear infinite"><path d="M12 2a10 10 0 1 0 10 10" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"/></svg> Sending...`;
+      document.getElementById('emailStatus').textContent = '';
+
+      const sentDate = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+      const content  = buildTarotEmail();
+
+      if (EMAILJS_READY) {
+        emailjs.init(EMAILJS_PUBLIC_KEY);
+        emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+          to_name:  name || 'there',
+          to_email: userEmail,
+          subject:  `Your HORA Tarot Reading · ${sentDate}`,
+          zodiac,
+          sent_date: sentDate,
+          content,
+        })
+        .then(() => {
+          recordSent(userEmail);
+          btn.innerHTML = `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke="currentColor" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Sent!`;
+          document.getElementById('emailStatus').textContent = `Delivered to ${userEmail}`;
+          document.getElementById('emailStatus').className = 'email-status success';
+          document.getElementById('emailLog').textContent = `Sent on ${sentDate}`;
+        })
+        .catch(() => {
+          btn.disabled = false;
+          btn.innerHTML = `<svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg> Email My Results`;
+          document.getElementById('emailStatus').textContent = 'Send failed — check your EmailJS config.';
+          document.getElementById('emailStatus').className = 'email-status error';
+        });
+      } else {
+        const sub  = `Your HORA Tarot Reading · ${sentDate}`;
+        const body = content.substring(0, 1800);
+        window.location.href = `mailto:${userEmail}?subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
+        recordSent(userEmail);
+        btn.innerHTML = `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke="currentColor" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Opening Email App...`;
+        document.getElementById('emailStatus').textContent = `Opening your email app for ${userEmail}`;
+        document.getElementById('emailStatus').className = 'email-status success';
+        document.getElementById('emailLog').textContent = `Sent on ${sentDate}`;
+        btn.disabled = true;
+      }
+    }
+
+    // Show last sent date on load
+    (function() {
+      const last = getLastSent();
+      if (last) {
+        const d = new Date(last.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+        document.getElementById('emailLog').textContent = `Last sent: ${d} → ${last.email}`;
+      }
+    })();
+
+    document.getElementById('btnSendEmail').addEventListener('click', sendToEmail);
+
+    if (!document.getElementById('emailSpinStyle')) {
+      const s = document.createElement('style');
+      s.id = 'emailSpinStyle';
+      s.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+      document.head.appendChild(s);
+    }
   </script>
 </body>
 </html>

@@ -357,7 +357,10 @@
           <a href="#">Forgot password?</a>
         </div>
 
-        <button type="submit" onclick="navigate('name.html'); return false;">Sign In</button>
+        <button type="submit" onclick="
+          sessionStorage.setItem('hora_email', document.getElementById('email').value.trim());
+          navigate('name.html');
+          return false;">Sign In</button>
       </form>
 
       <div class="divider"><span>or</span></div>
