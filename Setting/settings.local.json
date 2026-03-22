@@ -25,7 +25,15 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git branch:*)",
-      "Bash(git remote:*)"
+      "Bash(git remote:*)",
+      "Bash(git config:*)",
+      "Bash(git push:*)",
+      "Bash(for f:*)",
+      "Bash(do echo:*)",
+      "Read(//c/Users/user/hora/**)",
+      "Bash(done)",
+      "Bash(gh api:*)",
+      "Bash(grep:*)"
     ]
   }
 }
