@@ -204,6 +204,10 @@
       margin-top: 3px;
       text-transform: uppercase;
     }
+
+    @keyframes pageIn { from { opacity: 0; } to { opacity: 1; } }
+    body { animation: pageIn 0.35s ease both; }
+    body.page-out { opacity: 0 !important; transition: opacity 0.25s ease !important; animation: none !important; }
   </style>
 </head>
 <body>
@@ -236,6 +240,11 @@
   <div class="recommendations" id="recsContainer"></div>
 
   <script>
+    function navigate(url) {
+      document.body.classList.add('page-out');
+      setTimeout(() => { window.location.href = url; }, 260);
+    }
+
     const params   = new URLSearchParams(window.location.search);
     const name     = params.get('name')  || '';
     const day      = parseInt(params.get('day'))   || new Date().getDate();
@@ -246,6 +255,10 @@
     // Back button preserves params
     document.getElementById('backBtn').href =
       `home.html?name=${encodeURIComponent(name)}&day=${day}&month=${encodeURIComponent(monthStr)}&year=${year}&focus=${focus}`;
+    document.getElementById('backBtn').addEventListener('click', e => {
+      e.preventDefault();
+      navigate(e.currentTarget.href);
+    });
 
     const monthNames = ['January','February','March','April','May','June',
                         'July','August','September','October','November','December'];

@@ -289,10 +289,16 @@
 
     .signup a:hover { text-decoration: underline; }
 
-    /* Page fade-out transition */
-    body.fade-out {
-      opacity: 0;
-      transition: opacity 0.5s ease;
+    /* Page transitions */
+    @keyframes pageIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    body { animation: pageIn 0.35s ease both; }
+    body.page-out {
+      opacity: 0 !important;
+      transition: opacity 0.25s ease !important;
+      animation: none !important;
     }
 
     /* Disclaimer */
@@ -351,7 +357,7 @@
           <a href="#">Forgot password?</a>
         </div>
 
-        <button type="submit" onclick="document.body.classList.add('fade-out'); setTimeout(() => window.location.href='name.html', 500); return false;">Sign In</button>
+        <button type="submit" onclick="navigate('name.html'); return false;">Sign In</button>
       </form>
 
       <div class="divider"><span>or</span></div>
@@ -369,6 +375,11 @@
   </p>
 
   <script>
+    function navigate(url) {
+      document.body.classList.add('page-out');
+      setTimeout(() => { window.location.href = url; }, 260);
+    }
+
     function dismissLoading() {
       const loading = document.getElementById('loading');
       loading.classList.add('hidden');

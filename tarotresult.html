@@ -165,6 +165,10 @@
       transition:background 0.2s;
     }
     .btn-home:hover { background:rgba(61,144,147,0.4); }
+
+    @keyframes pageIn { from { opacity: 0; } to { opacity: 1; } }
+    body { animation: pageIn 0.35s ease both; }
+    body.page-out { opacity: 0 !important; transition: opacity 0.25s ease !important; animation: none !important; }
   </style>
 </head>
 <body>
@@ -190,6 +194,11 @@
   <a class="btn-home" id="homeBtn" href="home.html">Back to Home</a>
 
   <script>
+    function navigate(url) {
+      document.body.classList.add('page-out');
+      setTimeout(() => { window.location.href = url; }, 260);
+    }
+
     // ── Same deck data ──
     const BASE_W = 'https://upload.wikimedia.org/wikipedia/commons/';
     const deck = [
@@ -262,6 +271,12 @@
 
     document.getElementById('backBtn').href  = `tarot.html?${bdayQ}`;
     document.getElementById('homeBtn').href  = `home.html?${bdayQ}`;
+    document.getElementById('backBtn').addEventListener('click', e => {
+      e.preventDefault(); navigate(e.currentTarget.href);
+    });
+    document.getElementById('homeBtn').addEventListener('click', e => {
+      e.preventDefault(); navigate(e.currentTarget.href);
+    });
 
     // ── Zodiac & ruling card ──
     const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];

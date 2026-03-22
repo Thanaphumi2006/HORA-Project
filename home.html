@@ -249,12 +249,16 @@
       text-transform: uppercase;
       text-align: center;
     }
+
+    @keyframes pageIn { from { opacity: 0; } to { opacity: 1; } }
+    body { animation: pageIn 0.35s ease both; }
+    body.page-out { opacity: 0 !important; transition: opacity 0.25s ease !important; animation: none !important; }
   </style>
 </head>
 <body>
 
   <div class="header">
-    <a class="btn-signout" href="index.html">
+    <a class="btn-signout" href="index.html" onclick="event.preventDefault(); navigate('index.html');">
       <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       Sign Out
     </a>
@@ -298,6 +302,11 @@
   </div>
 
   <script>
+    function navigate(url) {
+      document.body.classList.add('page-out');
+      setTimeout(() => { window.location.href = url; }, 260);
+    }
+
     const params   = new URLSearchParams(window.location.search);
     const name     = params.get('name')  || 'there';
     const day      = parseInt(params.get('day'))   || new Date().getDate();
@@ -430,10 +439,10 @@
     const focus = params.get('focus') || 'love';
     const bdayQ = `name=${encodeURIComponent(name)}&day=${day}&month=${encodeURIComponent(monthStr)}&year=${year}`;
     document.getElementById('todayCard').addEventListener('click', () => {
-      window.location.href = `predict.html?${bdayQ}&focus=${focus}`;
+      navigate(`predict.html?${bdayQ}&focus=${focus}`);
     });
     document.getElementById('tarotCard').addEventListener('click', () => {
-      window.location.href = `tarot.html?${bdayQ}`;
+      navigate(`tarot.html?${bdayQ}`);
     });
   </script>
 

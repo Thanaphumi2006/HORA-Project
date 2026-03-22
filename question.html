@@ -77,6 +77,10 @@
     }
 
     .btn-skip:hover { color: #1a6568; }
+
+    @keyframes pageIn { from { opacity: 0; } to { opacity: 1; } }
+    body { animation: pageIn 0.35s ease both; }
+    body.page-out { opacity: 0 !important; transition: opacity 0.25s ease !important; animation: none !important; }
   </style>
 </head>
 <body>
@@ -90,18 +94,23 @@
   </div>
 
   <script>
+    function navigate(url) {
+      document.body.classList.add('page-out');
+      setTimeout(() => { window.location.href = url; }, 260);
+    }
+
     const params = new URLSearchParams(window.location.search);
     const bday = `name=${encodeURIComponent(params.get('name')||'')}&day=${params.get('day')||''}&month=${encodeURIComponent(params.get('month')||'')}&year=${params.get('year')||''}`;
 
     // Skip → home page
     document.getElementById('skipBtn').addEventListener('click', e => {
       e.stopPropagation();
-      window.location.href = `home.html?${bday}`;
+      navigate(`home.html?${bday}`);
     });
 
     // Click anywhere else → focus area page
     document.body.addEventListener('click', () => {
-      window.location.href = `focus.html?${bday}`;
+      navigate(`focus.html?${bday}`);
     });
   </script>
 

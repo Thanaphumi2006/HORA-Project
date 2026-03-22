@@ -103,6 +103,10 @@
     .btn-continue:hover {
       background: rgba(100, 185, 188, 0.4);
     }
+
+    @keyframes pageIn { from { opacity: 0; } to { opacity: 1; } }
+    body { animation: pageIn 0.35s ease both; }
+    body.page-out { opacity: 0 !important; transition: opacity 0.25s ease !important; animation: none !important; }
   </style>
 </head>
 <body>
@@ -127,6 +131,11 @@
   <button class="btn-continue" id="continueBtn">Continue</button>
 
   <script>
+    function navigate(url) {
+      document.body.classList.add('page-out');
+      setTimeout(() => { window.location.href = url; }, 260);
+    }
+
     const params = new URLSearchParams(window.location.search);
     const bday = `name=${encodeURIComponent(params.get('name')||'')}&day=${params.get('day')||''}&month=${encodeURIComponent(params.get('month')||'')}&year=${params.get('year')||''}`;
 
@@ -144,7 +153,7 @@
     btn.addEventListener('click', () => {
       const selected = document.querySelector('.card.selected');
       const focus = selected ? selected.dataset.area : 'love';
-      window.location.href = `home.html?${bday}&focus=${focus}`;
+      navigate(`home.html?${bday}&focus=${focus}`);
     });
   </script>
 
