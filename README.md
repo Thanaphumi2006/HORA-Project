@@ -2,9 +2,15 @@
 
 HORA is a browser-based astrology and tarot reading web app. Enter your name and birthday to receive a daily horoscope prediction and a tarot card reading based on your zodiac sign.
 
+## Live App
+
+**https://thanaphumi2006.github.io/HORA-Project/**
+
+No download or installation needed — just open the link in your browser.
+
 ---
 
-## Quick Start (For Everyone)
+## Run Locally (Optional)
 
 ### Step 1 — Download the project
 
