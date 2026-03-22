@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HORA – Card Prediction</title>
+  <link href="https://fonts.googleapis.com/css2?family=Encode+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      min-height:100vh;
+      background:linear-gradient(180deg,#c9f0ef 0%,#a8e4e3 40%,#b8eceb 100%);
+      font-family:'Encode Sans SC',sans-serif;
+      overflow-y:auto;
+      padding-bottom:48px;
+    }
+
+    .header {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:44px 28px 20px;
+    }
+    .btn-back {
+      display:flex;align-items:center;gap:6px;text-decoration:none;color:#1a6568;
+      font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;
+      opacity:0.75;transition:opacity 0.2s;
+    }
+    .btn-back:hover { opacity:1; }
+    .btn-back svg { width:18px;height:18px;stroke:#3d9093;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round; }
+    .page-title {
+      font-size:20px;font-weight:700;letter-spacing:3px;color:#1a6568;text-transform:uppercase;
+    }
+    .menu-icon { width:20px;height:14px;display:flex;flex-direction:column;justify-content:space-between;opacity:0.5; }
+    .menu-icon span { display:block;height:2px;background:#3d9093;border-radius:2px; }
+
+    /* First prediction banner */
+    .first-card-banner {
+      margin:0 24px 24px;
+      padding:16px 20px;
+      background:rgba(255,255,255,0.3);
+      backdrop-filter:blur(10px);
+      border-radius:16px;
+      border-left:3px solid #c9a84c;
+    }
+    .banner-label {
+      font-size:9px;letter-spacing:2px;color:#1a6568;text-transform:uppercase;margin-bottom:4px;
+    }
+    .banner-card-name {
+      font-size:14px;font-weight:700;color:#1d6e71;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;
+    }
+    .banner-text {
+      font-size:11px;line-height:1.8;color:#1a6568;letter-spacing:0.2px;
+    }
+
+    /* Section label */
+    .section-label {
+      font-size:11px;font-weight:700;letter-spacing:2.5px;color:#1a6568;
+      text-transform:uppercase;padding:0 24px;margin-bottom:16px;
+    }
+
+    /* Card result row */
+    .result-list { display:flex;flex-direction:column;gap:16px;padding:0 24px; }
+
+    .result-row {
+      display:flex;gap:16px;align-items:stretch;
+      background:rgba(255,255,255,0.32);
+      backdrop-filter:blur(12px);
+      border-radius:16px;
+      overflow:hidden;
+      box-shadow:0 4px 20px rgba(100,180,185,0.1);
+      animation:fadeUp 0.4s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity:0;transform:translateY(16px); }
+      to   { opacity:1;transform:translateY(0); }
+    }
+
+    .result-row:nth-child(2) { animation-delay:0.1s; }
+    .result-row:nth-child(3) { animation-delay:0.2s; }
+
+    /* Mini tarot card visual */
+    .mini-card {
+      width:100px;
+      flex-shrink:0;
+      display:flex;flex-direction:column;
+      border-right:1px solid rgba(201,168,76,0.25);
+      background:#fdf6e3;
+      overflow:hidden;
+    }
+
+    .mini-card-img {
+      flex:1;
+      width:100%;
+      object-fit:cover;
+      object-position:top;
+      display:block;
+      min-height:110px;
+    }
+
+    .mini-card-fallback {
+      flex:1;
+      display:none;
+      align-items:center;justify-content:center;
+      font-size:32px;
+      min-height:110px;
+    }
+
+    .mini-card-label {
+      padding:6px 4px;
+      text-align:center;
+      font-size:7px;font-weight:700;letter-spacing:1px;
+      color:#1a3a5c;text-transform:uppercase;
+      line-height:1.4;
+      border-top:1px solid rgba(201,168,76,0.4);
+      background:#fdf6e3;
+      flex-shrink:0;
+    }
+
+    /* Card meaning */
+    .result-meaning {
+      flex:1;padding:16px 16px 16px 4px;
+      display:flex;flex-direction:column;gap:8px;
+    }
+
+    .meaning-number {
+      font-size:9px;letter-spacing:2px;color:rgba(29, 110, 113, 0.97);text-transform:uppercase;
+    }
+
+    .meaning-name {
+      font-size:13px;font-weight:700;color:#1d6e71;
+      letter-spacing:1.5px;text-transform:uppercase;line-height:1.3;
+    }
+
+    .meaning-type {
+      font-size:9px;letter-spacing:1.5px;color:#1a6568;text-transform:uppercase;
+    }
+
+    .meaning-keywords {
+      font-size:9px;letter-spacing:1px;color:#1a6568;
+      text-transform:uppercase;font-style:italic;
+    }
+
+    .meaning-divider {
+      height:1px;background:rgba(100,185,188,0.35);
+    }
+
+    .meaning-up-label {
+      font-size:8px;letter-spacing:2px;color:#1a6568;text-transform:uppercase;
+    }
+
+    .meaning-text {
+      font-size:11px;line-height:1.8;color:#1d6e71;letter-spacing:0.2px;
+    }
+
+    /* Home button */
+    .btn-home {
+      display:block;margin:28px 24px 0;
+      background:rgba(61,144,147,0.25);border:1.5px solid rgba(61,144,147,0.4);
+      border-radius:50px;padding:14px;
+      font-family:'Encode Sans SC',sans-serif;
+      font-size:13px;font-weight:600;letter-spacing:2px;
+      color:#1a6568;text-transform:uppercase;
+      cursor:pointer;text-align:center;text-decoration:none;
+      transition:background 0.2s;
+    }
+    .btn-home:hover { background:rgba(61,144,147,0.4); }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <a class="btn-back" id="backBtn" href="tarot.html">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </a>
+    <span class="page-title">Card Prediction</span>
+    <div class="menu-icon"><span></span><span></span><span></span></div>
+  </div>
+
+  <!-- First/Ruling card from prediction -->
+  <div class="first-card-banner" id="firstCardBanner" style="display:none">
+    <div class="banner-label">Your Ruling Card · Today's Prediction</div>
+    <div class="banner-card-name" id="bannerName"></div>
+    <div class="banner-text" id="bannerText"></div>
+  </div>
+
+  <div class="section-label">Your Selected Cards</div>
+  <div class="result-list" id="resultList"></div>
+
+  <a class="btn-home" id="homeBtn" href="home.html">Back to Home</a>
+
+  <script>
+    // ── Same deck data ──
+    const BASE_W = 'https://upload.wikimedia.org/wikipedia/commons/';
+    const deck = [
+      { id:'maj0',  name:'The Fool',           img:BASE_W+'0/03/RWS_Tarot_00_Fool.jpg',               symbol:'🌟', type:'Major',    keywords:'New beginnings, innocence, adventure, free spirit',           up:'A leap of faith awaits. Embrace new beginnings with an open heart — the universe supports your journey.', rev:'Recklessness, risk-taking, a lack of direction or poor judgement clouding your path forward.' },
+      { id:'maj1',  name:'The Magician',        img:BASE_W+'d/de/RWS_Tarot_01_Magician.jpg',           symbol:'✦',  type:'Major',    keywords:'Willpower, desire, creation, manifestation',                  up:'You have all the tools you need. Channel your focus and manifest your intentions into reality now.', rev:'Manipulation, poor planning, untapped talents or skills being used for the wrong purpose.' },
+      { id:'maj2',  name:'The High Priestess',  img:BASE_W+'8/88/RWS_Tarot_02_High_Priestess.jpg',     symbol:'🌙', type:'Major',    keywords:'Intuition, mystery, inner knowledge, unconscious mind',       up:'Listen to your inner voice. Hidden truths are surfacing — trust your intuition above rational thought.', rev:'Secrets, disconnection from intuition, withdrawal or information being withheld from you.' },
+      { id:'maj3',  name:'The Empress',         img:BASE_W+'d/d3/RWS_Tarot_03_Empress.jpg',            symbol:'🌿', type:'Major',    keywords:'Abundance, nurturing, nature, fertility, beauty',             up:'A time of growth and abundance. Nature and creativity flow freely — nurture what you love.', rev:'Creative block, dependence, smothering or neglect of self and others around you.' },
+      { id:'maj4',  name:'The Emperor',         img:BASE_W+'c/c3/RWS_Tarot_04_Emperor.jpg',            symbol:'♛',  type:'Major',    keywords:'Authority, structure, a father figure, solid foundation',     up:'Take charge and establish order. Your leadership and determination will bring lasting, stable results.', rev:'Domination, excessive control, rigidity or an abuse of authority affecting your situation.' },
+      { id:'maj5',  name:'The Hierophant',      img:BASE_W+'8/8d/RWS_Tarot_05_Hierophant.jpg',         symbol:'⛪', type:'Major',    keywords:'Spiritual wisdom, religious beliefs, tradition, conformity',   up:'Seek wisdom from tradition or a trusted mentor. Spiritual growth comes through learning and established systems.', rev:'Personal beliefs, freedom from convention, challenging institutions that no longer serve you.' },
+      { id:'maj6',  name:'The Lovers',          img:BASE_W+'3/3a/TheLovers.jpg',                        symbol:'♡',  type:'Major',    keywords:'Love, harmony, relationships, values alignment, choices',     up:'A meaningful connection or important choice is at hand. Follow your heart with clear intention and purpose.', rev:'Self-love, disharmony, imbalance, misaligned values or a difficult decision weighing on you.' },
+      { id:'maj7',  name:'The Chariot',         img:BASE_W+'9/9b/RWS_Tarot_07_Chariot.jpg',            symbol:'⚡', type:'Major',    keywords:'Control, willpower, success, action, determination',          up:'Press forward with confidence. Focus and determination will carry you through any obstacle in your path.', rev:'Self-discipline lacking, opposition, lack of direction or aggression undermining your progress.' },
+      { id:'maj8',  name:'Strength',            img:BASE_W+'f/f5/RWS_Tarot_08_Strength.jpg',           symbol:'🦁', type:'Major',    keywords:'Strength, courage, patience, control, compassion',            up:'True power comes from within. Approach challenges with compassion and gentle strength rather than force.', rev:'Inner strength is being doubted, low energy, raw emotion or self-doubt holding you back.' },
+      { id:'maj9',  name:'The Hermit',          img:BASE_W+'4/4d/RWS_Tarot_09_Hermit.jpg',             symbol:'🕯️', type:'Major',    keywords:'Soul-searching, introspection, being alone, inner guidance',  up:'Step back and look within. A period of quiet reflection will illuminate your path and reveal your truth.', rev:'Isolation, loneliness, withdrawal or rejection of the guidance being offered to you.' },
+      { id:'maj10', name:'Wheel of Fortune',    img:BASE_W+'3/3c/RWS_Tarot_10_Wheel_of_Fortune.jpg',  symbol:'☸️', type:'Major',    keywords:'Good luck, karma, life cycles, destiny, a turning point',     up:'The wheel is turning in your favour. Embrace change — a new, fortunate cycle is beginning now.', rev:'Bad luck, resistance to change, breaking cycles or a turning point that feels beyond your control.' },
+      { id:'maj11', name:'Justice',             img:BASE_W+'e/e0/RWS_Tarot_11_Justice.jpg',            symbol:'⚖️', type:'Major',    keywords:'Justice, fairness, truth, cause and effect, law',             up:'Balance and truth prevail. Act with integrity and the universe will restore harmony and equilibrium.', rev:'Unfairness, lack of accountability, dishonesty or consequences of past actions catching up.' },
+      { id:'maj12', name:'The Hanged Man',      img:BASE_W+'2/2b/RWS_Tarot_12_Hanged_Man.jpg',        symbol:'🔄', type:'Major',    keywords:'Pause, surrender, letting go, new perspectives, enlightenment',up:'Let go and gain a new vantage point. Surrender opens doors that force alone cannot unlock.', rev:'Delays, resistance, stalling or an inability to release what is no longer serving you.' },
+      { id:'maj13', name:'Death',               img:BASE_W+'d/d7/RWS_Tarot_13_Death.jpg',              symbol:'🌑', type:'Major',    keywords:'Endings, beginnings, change, transformation, transition',      up:'An ending makes way for powerful transformation. Release the old to welcome what is aligned with you now.', rev:'Resistance to change, personal transformation from within or fear of endings blocking your growth.' },
+      { id:'maj14', name:'Temperance',          img:BASE_W+'f/f8/RWS_Tarot_14_Temperance.jpg',        symbol:'💧', type:'Major',    keywords:'Balance, moderation, patience, purpose, meaning',             up:'Find the middle path. Patience and balance bring the harmony, healing and integration you are seeking.', rev:'Imbalance, excess, self-healing needed or realignment of your priorities required now.' },
+      { id:'maj15', name:'The Devil',           img:BASE_W+'5/55/RWS_Tarot_15_Devil.jpg',              symbol:'🔗', type:'Major',    keywords:'Shadow self, attachment, addiction, restriction, sexuality',   up:'Examine what binds you. Awareness of your patterns and shadow self is the first step to lasting freedom.', rev:'Releasing limiting beliefs, exploring dark thoughts, detachment from what no longer serves you.' },
+      { id:'maj16', name:'The Tower',           img:BASE_W+'5/53/RWS_Tarot_16_Tower.jpg',              symbol:'⚡', type:'Major',    keywords:'Sudden change, upheaval, chaos, revelation, awakening',       up:'Unexpected change shakes the foundation — but what remains will be truer, stronger and more authentic.', rev:'Personal transformation, fear of change, averting disaster or a delayed upheaval building beneath.' },
+      { id:'maj17', name:'The Star',            img:BASE_W+'d/db/RWS_Tarot_17_Star.jpg',               symbol:'⭐', type:'Major',    keywords:'Hope, faith, purpose, renewal, spirituality',                 up:'After the storm comes light. Hope, healing and inspiration flow toward you like starlight in darkness.', rev:'Lack of faith, despair, self-trust challenged or a disconnection from your sense of hope and purpose.' },
+      { id:'maj18', name:'The Moon',            img:BASE_W+'7/7f/RWS_Tarot_18_Moon.jpg',               symbol:'🌕', type:'Major',    keywords:'Illusion, fear, the unconscious, intuition, confusion',       up:'Not all is as it seems. Trust your instincts and look beyond illusions to find the deeper truth beneath.', rev:'Release of fear, repressed emotion, inner confusion lifting or hidden truths coming to light.' },
+      { id:'maj19', name:'The Sun',             img:BASE_W+'1/17/RWS_Tarot_19_Sun.jpg',                symbol:'☀️', type:'Major',    keywords:'Positivity, fun, warmth, success, vitality',                  up:'Radiant energy surrounds you. Confidence, clarity, joy and success are yours to embrace fully today.', rev:'Inner child, feeling down, overly optimistic or temporarily blocked from your natural joy and radiance.' },
+      { id:'maj20', name:'Judgement',           img:BASE_W+'d/dd/RWS_Tarot_20_Judgement.jpg',          symbol:'🎺', type:'Major',    keywords:'Judgement, rebirth, inner calling, absolution, awakening',    up:'A moment of profound awakening. Answer your calling and step boldly and authentically into your purpose.', rev:'Self-doubt, inner critic, ignoring the call or refusing to learn the lessons being presented to you.' },
+      { id:'maj21', name:'The World',           img:BASE_W+'f/ff/RWS_Tarot_21_World.jpg',              symbol:'🌍', type:'Major',    keywords:'Completion, integration, accomplishment, travel, wholeness',   up:'A cycle is beautifully complete. Celebrate how far you have come — wholeness and fulfilment are yours now.', rev:'Seeking personal closure, shortcuts being taken or an incomplete journey that requires more of your attention.' },
+      { id:'w1',  name:'Ace of Wands',     img:BASE_W+'1/11/Wands01.jpg', symbol:'🔥', type:'Wands',     keywords:'Inspiration, new opportunities, growth, potential',              up:'A spark of inspiration ignites. Seize this creative energy and take decisive action toward your passion.', rev:'Delays, lack of motivation, weighed down or creative blocks preventing you from starting fresh.' },
+      { id:'w2',  name:'Two of Wands',     img:BASE_W+'a/a3/Wands02.jpg', symbol:'🔥', type:'Wands',     keywords:'Future planning, progress, decisions, discovery',                 up:'You are standing at the threshold of possibility. Plan boldly and take the first courageous step forward.', rev:'Personal goals, inner alignment, fear of the unknown or playing it too safe with your ambitions.' },
+      { id:'w3',  name:'Three of Wands',   img:BASE_W+'f/f9/Wands03.jpg', symbol:'🔥', type:'Wands',     keywords:'Progress, expansion, foresight, overseas opportunities',          up:'Your plans are already in motion. Look to the horizon — expansion and progress are heading your way.', rev:'Playing small, lack of foresight, unexpected delays or obstacles interrupting your momentum.' },
+      { id:'w6',  name:'Six of Wands',     img:BASE_W+'3/38/Wands06.jpg', symbol:'🔥', type:'Wands',     keywords:'Success, public recognition, progress, self-confidence',          up:'Victory is yours. Public recognition arrives and your confidence inspires those around you to believe too.', rev:'Private achievement, personal definition of success or a fall from a position of pride.' },
+      { id:'w8',  name:'Eight of Wands',   img:BASE_W+'e/e0/Wands08.jpg', symbol:'🔥', type:'Wands',     keywords:'Movement, fast paced change, action, alignment, air travel',      up:'Things are moving fast now. Swift action brings alignment — be ready to receive what is rushing toward you.', rev:'Delays, frustration, resisting change or losing momentum on something that needs consistent energy.' },
+      { id:'c1',  name:'Ace of Cups',      img:BASE_W+'3/36/Cups01.jpg',  symbol:'💧', type:'Cups',      keywords:'Love, new relationships, compassion, creativity',                 up:'An outpouring of love and emotional energy. Open your heart — new connections and joy are arriving now.', rev:'Self-love, intuition, repressed emotions or creative blocks preventing your heart from opening.' },
+      { id:'c2',  name:'Two of Cups',      img:BASE_W+'2/2f/Cups02.jpg',  symbol:'💧', type:'Cups',      keywords:'Unified love, partnership, mutual attraction',                     up:'A deep and meaningful connection is forming. Mutual understanding and emotional harmony define this bond.', rev:'Self-love, break-ups, disharmony or an imbalance of power or feeling in an important relationship.' },
+      { id:'c4',  name:'Four of Cups',     img:BASE_W+'6/63/Cups04.jpg',  symbol:'💧', type:'Cups',      keywords:'Meditation, contemplation, apathy, reevaluation',                 up:'A time to pause and reflect. What is right in front of you may hold more value than what you are searching for.', rev:'Retreat, withdrawal, checking in with yourself or recognising an opportunity you previously overlooked.' },
+      { id:'c7',  name:'Seven of Cups',    img:BASE_W+'a/a0/Cups07.jpg',  symbol:'💧', type:'Cups',      keywords:'Opportunities, choices, wishful thinking, illusion',               up:'Many possibilities appear before you. Get clear on what you truly want before making your choice today.', rev:'Alignment, personal values, overwhelmed by options or returning to clarity after confusion and illusion.' },
+      { id:'c10', name:'Ten of Cups',      img:BASE_W+'8/8f/Cups10.jpg',  symbol:'💧', type:'Cups',      keywords:'Divine love, blissful relationships, harmony, alignment',          up:'Deep fulfilment in relationships and home life. True happiness and emotional harmony surround you now.', rev:'Disconnection, misaligned values, broken family dynamic or searching for the meaning of true happiness.' },
+      { id:'s1',  name:'Ace of Swords',    img:BASE_W+'1/1a/Swords01.jpg',symbol:'💨', type:'Swords',    keywords:'Breakthroughs, new ideas, mental clarity, success, truth',        up:'A breakthrough arrives with clarity and truth. Cut through confusion — the answer you need is now clear.', rev:'Inner clarity, re-thinking decisions or a powerful idea that needs to be refined before it can emerge.' },
+      { id:'s3',  name:'Three of Swords',  img:BASE_W+'d/d0/Swords03.jpg',symbol:'💨', type:'Swords',    keywords:'Heartbreak, emotional pain, sorrow, grief, hurt',                 up:'Painful truths surface. Acknowledge the grief — moving through it honestly leads to real healing and growth.', rev:'Negative self-talk, releasing pain, optimism returning or the healing of a deep emotional wound.' },
+      { id:'s7',  name:'Seven of Swords',  img:BASE_W+'3/34/Swords07.jpg',symbol:'💨', type:'Swords',    keywords:'Betrayal, deception, getting away with something, stealth',       up:'Strategy and discretion are needed. Be mindful of who you trust — not everyone has honest intentions here.', rev:'Imposter syndrome, self-deceit, coming clean or finally acknowledging a truth you have been avoiding.' },
+      { id:'s10', name:'Ten of Swords',    img:BASE_W+'9/90/Swords10.jpg',symbol:'💨', type:'Swords',    keywords:'Painful endings, deep wounds, betrayal, loss, crisis',            up:'A painful ending, but also the beginning of a new chapter. Rock bottom brings the clarity needed to rise again.', rev:'Recovery, regeneration, resisting an inevitable ending or finding the strength to survive a crisis.' },
+      { id:'p1',  name:'Ace of Pentacles', img:BASE_W+'f/fd/Pents01.jpg', symbol:'🌱', type:'Pentacles', keywords:'A new financial or career opportunity, manifestation, abundance', up:'A new material opportunity presents itself. Plant this seed with intention — abundance and growth follow.', rev:'Lost opportunity, lack of planning, scarcity mindset or failing to act on a promising new beginning.' },
+      { id:'p5',  name:'Five of Pentacles',img:BASE_W+'6/62/Pents05.jpg', symbol:'🌱', type:'Pentacles', keywords:'Financial loss, poverty, lack mindset, isolation, worry',         up:'A difficult time financially or spiritually. Help is available — look up and reach out to what supports you.', rev:'Recovery from financial loss, spiritual poverty ending or finding your strength after a period of hardship.' },
+      { id:'p9',  name:'Nine of Pentacles',img:BASE_W+'8/8f/Pents09.jpg', symbol:'🌱', type:'Pentacles', keywords:'Abundance, luxury, self-sufficiency, financial independence',      up:'You have created something beautiful through your own hard work. Enjoy the abundance you have earned now.', rev:'Self-worth, over-investment in work, financial setbacks or a reminder that inner wealth matters most.' },
+      { id:'p10', name:'Ten of Pentacles', img:BASE_W+'a/a7/Pents10.jpg', symbol:'🌱', type:'Pentacles', keywords:'Wealth, financial security, family, long-term success, prosperity',up:'Legacy and lasting abundance. The foundations you have built support not just you but those you love.', rev:'The dark side of wealth, family disputes, financial failure or instability beneath a surface of prosperity.' },
+    ];
+
+    const deckMap = Object.fromEntries(deck.map(c => [c.id, c]));
+
+    // Zodiac → ruling card map
+    const zodiacTarotMap = {
+      Aries:'maj4', Taurus:'maj5', Gemini:'maj6', Cancer:'maj7',
+      Leo:'maj8', Virgo:'maj9', Libra:'maj11', Scorpio:'maj13',
+      Sagittarius:'maj14', Capricorn:'maj15', Aquarius:'maj17', Pisces:'maj18'
+    };
+
+    const typeColors = {
+      Major:    ['#0f1f3d','#1a3a5c'],
+      Wands:    ['#7b2d00','#c45200'],
+      Cups:     ['#0d3b6e','#1565c0'],
+      Swords:   ['#1a1a2e','#424242'],
+      Pentacles:['#1b4332','#2d6a4f'],
+    };
+
+    const params   = new URLSearchParams(window.location.search);
+    const name     = params.get('name')  || '';
+    const day      = params.get('day')   || '';
+    const monthStr = params.get('month') || 'January';
+    const year     = params.get('year')  || '';
+    const bdayQ    = `name=${encodeURIComponent(name)}&day=${day}&month=${encodeURIComponent(monthStr)}&year=${year}`;
+    const cardIds  = (params.get('cards') || '').split(',').filter(Boolean);
+
+    document.getElementById('backBtn').href  = `tarot.html?${bdayQ}`;
+    document.getElementById('homeBtn').href  = `home.html?${bdayQ}`;
+
+    // ── Zodiac & ruling card ──
+    const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const monthNum   = monthNames.indexOf(monthStr) + 1;
+    function getZodiac(d,m) {
+      d=parseInt(d)||1;m=parseInt(m)||1;
+      if((m===3&&d>=21)||(m===4&&d<=19)) return 'Aries';
+      if((m===4&&d>=20)||(m===5&&d<=20)) return 'Taurus';
+      if((m===5&&d>=21)||(m===6&&d<=20)) return 'Gemini';
+      if((m===6&&d>=21)||(m===7&&d<=22)) return 'Cancer';
+      if((m===7&&d>=23)||(m===8&&d<=22)) return 'Leo';
+      if((m===8&&d>=23)||(m===9&&d<=22)) return 'Virgo';
+      if((m===9&&d>=23)||(m===10&&d<=22)) return 'Libra';
+      if((m===10&&d>=23)||(m===11&&d<=21)) return 'Scorpio';
+      if((m===11&&d>=22)||(m===12&&d<=21)) return 'Sagittarius';
+      if((m===12&&d>=22)||(m===1&&d<=19)) return 'Capricorn';
+      if((m===1&&d>=20)||(m===2&&d<=18)) return 'Aquarius';
+      return 'Pisces';
+    }
+    const zodiac      = getZodiac(day, monthNum);
+    const rulingId    = zodiacTarotMap[zodiac] || 'maj18';
+    const rulingCard  = deckMap[rulingId];
+
+    if (rulingCard) {
+      document.getElementById('firstCardBanner').style.display = 'block';
+      document.getElementById('bannerName').textContent = rulingCard.name + '  ·  ' + zodiac + "'s Ruling Card";
+      document.getElementById('bannerText').textContent = rulingCard.up;
+    }
+
+    // ── Render selected cards ──
+    const list = document.getElementById('resultList');
+    cardIds.forEach((id, idx) => {
+      const card = deckMap[id];
+      if (!card) return;
+      const [c1, c2] = typeColors[card.type] || ['#0f1f3d','#1a3a5c'];
+
+      const row = document.createElement('div');
+      row.className = 'result-row';
+      row.style.animationDelay = `${idx * 0.12}s`;
+
+      row.innerHTML = `
+        <div class="mini-card">
+          <img class="mini-card-img" src="${card.img}" alt="${card.name}"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+          <div class="mini-card-fallback" style="background:linear-gradient(160deg,${c1},${c2})">
+            <span style="font-size:34px;">${card.symbol}</span>
+          </div>
+          <div class="mini-card-label">${card.name}</div>
+        </div>
+        <div class="result-meaning">
+          <div class="meaning-number">Card ${idx + 1} of 3</div>
+          <div class="meaning-name">${card.name}</div>
+          <div class="meaning-type">${card.type === 'Major' ? 'Major Arcana' : card.type + ' · Minor Arcana'}</div>
+          <div class="meaning-keywords">${card.keywords}</div>
+          <div class="meaning-divider"></div>
+          <div class="meaning-up-label">Upright Meaning</div>
+          <div class="meaning-text">${card.up}</div>
+        </div>
+      `;
+      list.appendChild(row);
+    });
+  </script>
+</body>
+</html>

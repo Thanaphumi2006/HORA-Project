@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HORA – Home</title>
+  <link href="https://fonts.googleapis.com/css2?family=Encode+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(180deg, #c9f0ef 0%, #a8e4e3 40%, #b8eceb 100%);
+      font-family: 'Encode Sans SC', sans-serif;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .header {
+      padding: 52px 32px 8px;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .btn-signout {
+      position: absolute;
+      top: 52px;
+      right: 32px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      text-decoration: none;
+      color: rgba(29, 110, 113, 0.93);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .btn-signout:hover { color: #1a6568; }
+    .btn-signout svg { width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round; }
+
+    .greeting {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a6568;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .subtitle {
+      margin-top: 5px;
+      font-size: 12px;
+      color: rgba(29, 110, 113, 0.91);
+      letter-spacing: 0.5px;
+    }
+
+    .zodiac-badge {
+      margin-top: 6px;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: rgba(29, 110, 113, 0.84);
+      text-transform: uppercase;
+    }
+
+    /* Circle area */
+    .circles-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      padding: 16px 24px 32px;
+    }
+
+    /* Base circle */
+    .circle-card {
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.38);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 6px 32px rgba(100, 180, 185, 0.15);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition:
+        width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+        height 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+        border-radius 0.5s ease,
+        box-shadow 0.4s ease;
+      overflow: hidden;
+    }
+
+    .circle-card:hover {
+      width: 320px;
+      height: 320px;
+      border-radius: 28px;
+      box-shadow: 0 12px 48px rgba(100, 180, 185, 0.25);
+    }
+
+    /* Label shown when collapsed */
+    .circle-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      transition: opacity 0.25s ease;
+      text-align: center;
+      padding: 0 20px;
+    }
+
+    .circle-card:hover .circle-label {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .circle-title {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      color: #1a6568;
+      text-transform: uppercase;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .circle-icon {
+      font-size: 22px;
+      color: rgba(29, 110, 113, 0.87);
+    }
+
+    /* Expanded content shown on hover */
+    .circle-content {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 28px 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease 0.15s;
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+
+    .circle-content::-webkit-scrollbar { display: none; }
+
+    .circle-card:hover .circle-content {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .content-title {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      color: #1a6568;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      flex-shrink: 0;
+    }
+
+    .content-tag {
+      font-size: 9px;
+      letter-spacing: 1.5px;
+      color: rgba(29, 110, 113, 0.87);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      flex-shrink: 0;
+    }
+
+    .content-divider {
+      height: 1px;
+      background: rgba(100, 185, 188, 0.2);
+      margin-bottom: 12px;
+      flex-shrink: 0;
+    }
+
+    .content-body {
+      font-size: 11px;
+      line-height: 1.85;
+      color: #1a6568;
+      letter-spacing: 0.2px;
+    }
+
+    .content-body.loading {
+      color: rgba(29, 110, 113, 0.78);
+      font-style: italic;
+    }
+
+    /* Tarot specifics */
+    .tarot-name {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: #1a6568;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+
+    .tarot-value {
+      display: block;
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: rgba(29, 110, 113, 0.82);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .section-label {
+      font-size: 8px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(29, 110, 113, 0.82);
+      display: block;
+      margin: 10px 0 3px;
+    }
+
+    /* Card name shown in collapsed tarot circle */
+    .circle-card-name {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: #1a6568;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    .circle-card-name.loading {
+      font-size: 10px;
+      font-weight: 400;
+      color: rgba(29, 110, 113, 0.78);
+      font-style: italic;
+      letter-spacing: 1px;
+    }
+
+    .circle-card-sub {
+      font-size: 9px;
+      letter-spacing: 1.5px;
+      color: rgba(29, 110, 113, 0.82);
+      text-transform: uppercase;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <a class="btn-signout" href="index.html">
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign Out
+    </a>
+    <div class="greeting">Hi <span id="userName">there</span></div>
+    <div class="subtitle">Here is your today prediction</div>
+    <div class="zodiac-badge">✦ <span id="zodiacBadge">—</span></div>
+  </div>
+
+  <div class="circles-wrap">
+
+    <!-- Today Prediction Circle -->
+    <div class="circle-card" id="todayCard" style="cursor:pointer">
+      <div class="circle-label">
+        <span class="circle-icon">✦</span>
+        <span class="circle-title">Today<br>Prediction</span>
+      </div>
+      <div class="circle-content">
+        <div class="content-title">Today Prediction</div>
+        <div class="content-tag" id="zodiacTag">—</div>
+        <div class="content-divider"></div>
+        <div class="content-body loading" id="horoscopeText">Reading the stars...</div>
+      </div>
+    </div>
+
+    <!-- Tarot Reading Circle -->
+    <div class="circle-card" id="tarotCard" style="cursor:pointer">
+      <div class="circle-label">
+        <span class="circle-icon">🜁</span>
+        <span class="circle-title">Tarot Reading</span>
+        <span class="circle-card-name loading" id="tarotCardName">Drawing card...</span>
+        <span class="circle-card-sub" id="tarotCardSub"></span>
+      </div>
+      <div class="circle-content">
+        <div class="content-title">Tarot Reading</div>
+        <div class="content-tag" id="tarotRulerTag">Major Arcana</div>
+        <div class="content-divider"></div>
+        <div class="content-body loading" id="tarotBody">Drawing your card...</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const params   = new URLSearchParams(window.location.search);
+    const name     = params.get('name')  || 'there';
+    const day      = parseInt(params.get('day'))   || new Date().getDate();
+    const monthStr = params.get('month') || 'January';
+    const year     = parseInt(params.get('year'))  || new Date().getFullYear();
+
+    document.getElementById('userName').textContent = name;
+
+    const monthNames = ['January','February','March','April','May','June',
+                        'July','August','September','October','November','December'];
+    const monthNum = monthNames.indexOf(monthStr) + 1;
+
+    // ── Zodiac ──
+    function getZodiac(d, m) {
+      if ((m===3&&d>=21)||(m===4&&d<=19)) return 'Aries';
+      if ((m===4&&d>=20)||(m===5&&d<=20)) return 'Taurus';
+      if ((m===5&&d>=21)||(m===6&&d<=20)) return 'Gemini';
+      if ((m===6&&d>=21)||(m===7&&d<=22)) return 'Cancer';
+      if ((m===7&&d>=23)||(m===8&&d<=22)) return 'Leo';
+      if ((m===8&&d>=23)||(m===9&&d<=22)) return 'Virgo';
+      if ((m===9&&d>=23)||(m===10&&d<=22)) return 'Libra';
+      if ((m===10&&d>=23)||(m===11&&d<=21)) return 'Scorpio';
+      if ((m===11&&d>=22)||(m===12&&d<=21)) return 'Sagittarius';
+      if ((m===12&&d>=22)||(m===1&&d<=19)) return 'Capricorn';
+      if ((m===1&&d>=20)||(m===2&&d<=18)) return 'Aquarius';
+      return 'Pisces';
+    }
+
+    const zodiac = getZodiac(day, monthNum);
+    document.getElementById('zodiacBadge').textContent = zodiac;
+    document.getElementById('zodiacTag').textContent   = zodiac;
+
+    // ── Zodiac → Tarot (labyrinthos.co + traditional astrology) ──
+    const zodiacTarotData = {
+      Aries:       { value: 4,  name: 'The Emperor',      up: 'Authority, structure, a father figure, solid foundation, power.', rev: 'Domination, excessive control, lack of discipline, inflexibility.' },
+      Taurus:      { value: 5,  name: 'The Hierophant',   up: 'Spiritual wisdom, religious beliefs, conformity, tradition, institutions.', rev: 'Personal beliefs, freedom, challenging the status quo.' },
+      Gemini:      { value: 6,  name: 'The Lovers',       up: 'Love, harmony, relationships, values alignment, choices.', rev: 'Self-love, disharmony, imbalance, misaligned values.' },
+      Cancer:      { value: 7,  name: 'The Chariot',      up: 'Control, willpower, success, action, determination.', rev: 'Self-discipline, opposition, lack of direction, aggression.' },
+      Leo:         { value: 8,  name: 'Strength',         up: 'Strength, courage, patience, control, compassion.', rev: 'Inner strength, self-doubt, low energy, raw emotion.' },
+      Virgo:       { value: 9,  name: 'The Hermit',       up: 'Soul-searching, introspection, being alone, inner guidance.', rev: 'Isolation, loneliness, withdrawal, rejection.' },
+      Libra:       { value: 11, name: 'Justice',          up: 'Justice, fairness, truth, cause and effect, law.', rev: 'Unfairness, lack of accountability, dishonesty.' },
+      Scorpio:     { value: 13, name: 'Death',            up: 'Endings, beginnings, change, transformation, transition.', rev: 'Resistance to change, personal transformation, inner purging.' },
+      Sagittarius: { value: 14, name: 'Temperance',       up: 'Balance, moderation, patience, purpose, meaning.', rev: 'Imbalance, excess, self-healing, realignment.' },
+      Capricorn:   { value: 15, name: 'The Devil',        up: 'Shadow self, attachment, addiction, restriction, sexuality.', rev: 'Releasing limiting beliefs, exploring dark thoughts, detachment.' },
+      Aquarius:    { value: 17, name: 'The Star',         up: 'Hope, faith, purpose, renewal, spirituality.', rev: 'Lack of faith, despair, self-trust, disconnection.' },
+      Pisces:      { value: 18, name: 'The Moon',         up: 'Illusion, fear, the unconscious, intuition, confusion.', rev: 'Release of fear, repressed emotion, inner confusion.' },
+    };
+
+    const rulingCard      = zodiacTarotData[zodiac] || zodiacTarotData['Pisces'];
+    const rulingCardValue = rulingCard.value;
+
+    // ── Show card name immediately (no API wait) ──
+    const nameEl = document.getElementById('tarotCardName');
+    nameEl.textContent = rulingCard.name;
+    nameEl.classList.remove('loading');
+    document.getElementById('tarotCardSub').textContent = zodiac + "'s Ruling Card";
+    document.getElementById('tarotRulerTag').textContent = zodiac + "'s Ruling Card";
+
+    // ── Show local meanings immediately as baseline ──
+    const tarotEl = document.getElementById('tarotBody');
+    tarotEl.classList.remove('loading');
+    tarotEl.innerHTML = `
+      <span class="tarot-name">${rulingCard.name}</span>
+      <span class="tarot-value">Card ${rulingCard.value} · ${zodiac}'s Ruling Card</span>
+      <span class="section-label">Upright</span>
+      <span>${rulingCard.up}</span>
+      <span class="section-label">Reversed</span>
+      <span>${rulingCard.rev}</span>
+    `;
+
+    // ── Local horoscope per zodiac (shows instantly, unique per birthday) ──
+    const zodiacHoroscope = {
+      Aries:       'Your boldness leads the way today. A burst of energy pushes you toward new opportunities — act decisively and trust your instincts. Someone around you needs your leadership.',
+      Taurus:      'Steadiness is your strength today. Practical matters flow smoothly and your patience pays off. A financial or creative project gains solid momentum — stay grounded.',
+      Gemini:      'Your mind is sharper than ever today. Conversations open unexpected doors. Share your ideas freely — the right people are listening. Curiosity guides you to a breakthrough.',
+      Cancer:      'Your intuition is heightened today. Trust the feelings beneath the surface. A connection with someone close deepens, and a small act of care makes a lasting impression.',
+      Leo:         'You radiate confidence today and others naturally gravitate toward you. A moment in the spotlight is well-deserved. Channel your warmth into a creative pursuit that lights you up.',
+      Virgo:       'Detail-oriented thinking serves you well today. A problem you have been working on becomes clearer. Your calm analysis brings a solution that others missed. Trust your process.',
+      Libra:       'Balance is your theme today. Relationships feel harmonious and a long-standing tension begins to ease. Beauty and creativity inspire you — make time for what brings you peace.',
+      Scorpio:     'Deep transformation is at work beneath the surface today. Something you release makes room for powerful growth. Trust the process — what ends now needed to end.',
+      Sagittarius: 'Adventure calls today. An unexpected opportunity to expand your horizons appears — say yes. Your optimism is infectious and your honesty opens doors that caution would have kept shut.',
+      Capricorn:   'Your ambition is well-directed today. Progress on a long-term goal becomes visible. The discipline you have maintained is starting to compound — keep your eyes on the summit.',
+      Aquarius:    'Your unique perspective is an asset today. A group or community benefits from your vision. Think beyond conventional solutions — your most original idea may be exactly what is needed.',
+      Pisces:      'Your imagination flows freely today. Creative and spiritual insights arrive effortlessly. Listen to your dreams and follow the subtle signs around you — they are guiding you forward.',
+    };
+
+    // ── Show local prediction immediately ──
+    const horoEl = document.getElementById('horoscopeText');
+    horoEl.textContent = zodiacHoroscope[zodiac] || zodiacHoroscope['Pisces'];
+    horoEl.classList.remove('loading');
+    document.getElementById('zodiacTag').textContent = zodiac;
+
+    // ── Enhance with live API data when available ──
+    fetch(`https://freehoroscopeapi.com/api/v1/get-horoscope/daily?sign=${zodiac}&day=today`)
+      .then(r => r.json())
+      .then(d => {
+        horoEl.textContent = d.data.horoscope.replace(/^Here is your horoscope[^:]*:\s*/i, '').trim();
+      })
+      .catch(() =>
+        fetch(`https://horoscope-app-api.vercel.app/api/v1/get-horoscope/daily?sign=${zodiac}&day=today`)
+          .then(r => r.json())
+          .then(d => {
+            horoEl.textContent = d.data.horoscope.replace(/^Here is your horoscope[^:]*:\s*/i, '').trim();
+          })
+      )
+      .catch(() => { /* local prediction already shown */ });
+
+    // ── Enhance tarot with API data (richer description) ──
+    fetch('https://freehoroscopeapi.com/api/v1/tarot/cards/major')
+      .then(r => r.json())
+      .then(data => {
+        const card = data.cards.find(c => c.value_int === rulingCardValue) || data.cards[0];
+
+        // Enhance with richer API description
+        const apiCard = data.cards.find(c => c.value_int === rulingCardValue);
+        if (apiCard) {
+          tarotEl.innerHTML = `
+            <span class="tarot-name">${apiCard.name}</span>
+            <span class="tarot-value">Card ${apiCard.value} · ${zodiac}'s Ruling Card</span>
+            <span class="section-label">Upright</span>
+            <span>${apiCard.meaning_up}</span>
+            <span class="section-label">Reversed</span>
+            <span>${apiCard.meaning_rev}</span>
+          `;
+        }
+      })
+      .catch(() => { /* local data already shown — no action needed */ });
+
+    // ── Navigation ──
+    const focus = params.get('focus') || 'love';
+    const bdayQ = `name=${encodeURIComponent(name)}&day=${day}&month=${encodeURIComponent(monthStr)}&year=${year}`;
+    document.getElementById('todayCard').addEventListener('click', () => {
+      window.location.href = `predict.html?${bdayQ}&focus=${focus}`;
+    });
+    document.getElementById('tarotCard').addEventListener('click', () => {
+      window.location.href = `tarot.html?${bdayQ}`;
+    });
+  </script>
+
+</body>
+</html>
