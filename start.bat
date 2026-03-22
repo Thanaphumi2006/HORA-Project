@@ -1,5 +1,32 @@
 @echo off
 title HORA Launcher
+
+:: Detect if running from inside a ZIP (Windows extracts to Temp)
+echo %~dp0 | findstr /i "\\Temp\\" >nul
+if %errorlevel% equ 0 (
+    echo %~dp0 | findstr /i ".zip" >nul
+    if %errorlevel% equ 0 (
+        echo.
+        echo  ╔══════════════════════════════════════════════════╗
+        echo  ║               ACTION REQUIRED                    ║
+        echo  ╚══════════════════════════════════════════════════╝
+        echo.
+        echo  You opened this file directly from inside the ZIP.
+        echo.
+        echo  Please do this instead:
+        echo.
+        echo    1. Close this window
+        echo    2. Right-click the ZIP file
+        echo    3. Click "Extract All..."
+        echo    4. Choose a folder ^(e.g. Desktop^) and click Extract
+        echo    5. Open the extracted folder
+        echo    6. Double-click start.bat inside that folder
+        echo.
+        pause
+        exit /b 1
+    )
+)
+
 echo.
 echo  Starting HORA...
 echo.
