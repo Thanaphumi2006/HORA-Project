@@ -12,10 +12,17 @@
   position: relative;
 }
 
-.home-page .btn-signout {
+.home-page .header-actions {
   position: absolute;
   top: 52px;
   right: 32px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.home-page .btn-signout,
+.home-page .btn-profile {
   display: flex;
   align-items: center;
   gap: 5px;
@@ -26,9 +33,15 @@
   letter-spacing: 1.5px;
   text-transform: uppercase;
   transition: color 0.2s;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
 }
-.home-page .btn-signout:hover { color: #1a6568; }
-.home-page .btn-signout svg {
+.home-page .btn-signout:hover,
+.home-page .btn-profile:hover { color: #1a6568; }
+.home-page .btn-signout svg,
+.home-page .btn-profile svg {
   width: 14px; height: 14px;
   stroke: currentColor; fill: none;
   stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;

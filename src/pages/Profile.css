@@ -1,0 +1,424 @@
+.profile-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #c9f0ef 0%, #a8e4e3 40%, #b8eceb 100%);
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 48px;
+}
+
+.profile-page .prof-header {
+  display: flex;
+  align-items: center;
+  padding: 52px 24px 20px;
+  gap: 12px;
+}
+
+.profile-page .btn-back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.35);
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.profile-page .btn-back svg {
+  width: 18px; height: 18px;
+  stroke: #1a6568; fill: none;
+  stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+}
+
+.profile-page .prof-title {
+  flex: 1;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #1a6568;
+  text-transform: uppercase;
+}
+
+.profile-page .prof-signout {
+  background: none;
+  border: 1.5px solid rgba(29,110,113,0.35);
+  border-radius: 50px;
+  padding: 6px 14px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: rgba(29,110,113,0.85);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.profile-page .prof-signout:hover {
+  background: rgba(29,110,113,0.08);
+}
+
+/* Identity card */
+.profile-page .prof-identity {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0 24px 24px;
+  background: rgba(255,255,255,0.4);
+  backdrop-filter: blur(12px);
+  border-radius: 18px;
+  padding: 20px 22px;
+}
+
+.profile-page .prof-avatar {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2d8a8d, #1a6568);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 4px 16px rgba(29,110,113,0.25);
+}
+
+.profile-page .prof-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile-page .prof-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1a6568;
+  letter-spacing: 0.5px;
+}
+
+.profile-page .prof-rename-btn {
+  background: none;
+  border: 1px solid rgba(29,110,113,0.3);
+  border-radius: 50px;
+  padding: 3px 10px;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgba(29,110,113,0.75);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+.profile-page .prof-rename-btn:hover {
+  background: rgba(29,110,113,0.08);
+  color: #1a6568;
+}
+
+.profile-page .prof-rename-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.profile-page .prof-rename-input {
+  flex: 1;
+  background: rgba(255,255,255,0.6);
+  border: 1.5px solid #2d8a8d;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a6568;
+  outline: none;
+  min-width: 0;
+}
+
+.profile-page .prof-rename-save {
+  background: #2d8a8d;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity 0.2s;
+}
+.profile-page .prof-rename-save:hover { opacity: 0.85; }
+
+.profile-page .prof-rename-cancel {
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: rgba(29,110,113,0.6);
+  cursor: pointer;
+  padding: 4px;
+  flex-shrink: 0;
+}
+
+.profile-page .prof-rename-ok {
+  font-size: 11px;
+  color: #2d8a8d;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+.profile-page .prof-email {
+  margin-top: 3px;
+  font-size: 12px;
+  color: rgba(29,110,113,0.7);
+  letter-spacing: 0.3px;
+}
+
+/* Stats */
+.profile-page .prof-stats {
+  display: flex;
+  gap: 10px;
+  margin: 0 24px 28px;
+}
+
+.profile-page .prof-stat {
+  flex: 1;
+  background: rgba(255,255,255,0.4);
+  backdrop-filter: blur(12px);
+  border-radius: 14px;
+  padding: 14px 10px;
+  text-align: center;
+}
+
+.profile-page .prof-stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a6568;
+  letter-spacing: 0.5px;
+}
+
+.profile-page .prof-stat-label {
+  margin-top: 4px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  color: rgba(29,110,113,0.75);
+  text-transform: uppercase;
+}
+
+/* History */
+.profile-page .prof-section-title {
+  margin: 0 24px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  color: rgba(29,110,113,0.85);
+  text-transform: uppercase;
+}
+
+.profile-page .prof-no-history {
+  margin: 0 24px;
+  padding: 24px;
+  text-align: center;
+  font-size: 13px;
+  color: rgba(29,110,113,0.65);
+  font-style: italic;
+  background: rgba(255,255,255,0.3);
+  border-radius: 14px;
+}
+
+.profile-page .prof-history {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 24px;
+}
+
+/* Record cards */
+.profile-page .prof-record {
+  background: rgba(255,255,255,0.42);
+  backdrop-filter: blur(12px);
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.profile-page .prof-record:hover { background: rgba(255,255,255,0.55); }
+
+.profile-page .prof-record-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 16px;
+  flex-wrap: wrap;
+}
+
+.profile-page .rec-type-badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border-radius: 50px;
+  padding: 3px 9px;
+  flex-shrink: 0;
+}
+.profile-page .rec-type-badge.daily {
+  background: rgba(100,185,188,0.2);
+  color: #1a6568;
+}
+.profile-page .rec-type-badge.tarot {
+  background: rgba(201,168,76,0.18);
+  color: #8a6a00;
+}
+
+.profile-page .rec-focus {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1a6568;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-page .rec-zodiac {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: rgba(29,110,113,0.75);
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.profile-page .rec-date {
+  font-size: 10px;
+  color: rgba(29,110,113,0.6);
+  flex-shrink: 0;
+}
+
+.profile-page .rec-chevron {
+  font-size: 9px;
+  color: rgba(29,110,113,0.5);
+  flex-shrink: 0;
+}
+
+.profile-page .prof-record-body {
+  padding: 4px 16px 16px;
+  border-top: 1px solid rgba(100,185,188,0.15);
+  animation: recExpand 0.2s ease;
+}
+
+@keyframes recExpand {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.profile-page .rec-prediction-line {
+  font-size: 12px;
+  line-height: 1.7;
+  color: #1a6568;
+  margin: 6px 0 0;
+  padding-left: 10px;
+  border-left: 2px solid rgba(100,185,188,0.4);
+}
+
+.profile-page .rec-colors { margin-top: 12px; }
+
+.profile-page .rec-colors-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(29,110,113,0.7);
+  margin-bottom: 8px;
+}
+
+.profile-page .rec-color-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.profile-page .rec-color-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.profile-page .rec-color-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: #1a6568;
+}
+
+.profile-page .rec-color-meaning {
+  font-size: 10px;
+  color: rgba(29,110,113,0.65);
+}
+
+/* Tarot record body */
+.profile-page .rec-ruling {
+  padding: 10px 0 8px;
+  border-bottom: 1px solid rgba(100,185,188,0.18);
+  margin-bottom: 10px;
+}
+.profile-page .rec-ruling-label {
+  display: block;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(201,168,76,0.85);
+  margin-bottom: 3px;
+}
+.profile-page .rec-ruling-name {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a6568;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+.profile-page .rec-ruling-text {
+  font-size: 12px;
+  line-height: 1.65;
+  color: rgba(29,110,113,0.85);
+  margin: 0;
+}
+
+.profile-page .rec-card-item {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(100,185,188,0.12);
+}
+.profile-page .rec-card-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1a6568;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+.profile-page .rec-card-keywords {
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: rgba(29,110,113,0.65);
+  margin-bottom: 4px;
+}
+.profile-page .rec-card-meaning {
+  font-size: 12px;
+  line-height: 1.65;
+  color: rgba(29,110,113,0.85);
+}
+
+.profile-page .prof-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: #1a6568;
+  font-size: 14px;
+}

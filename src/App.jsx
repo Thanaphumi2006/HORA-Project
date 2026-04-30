@@ -8,6 +8,7 @@ import Home from './pages/Home.jsx';
 import Predict from './pages/Predict.jsx';
 import Tarot from './pages/Tarot.jsx';
 import TarotResult from './pages/TarotResult.jsx';
+import Profile from './pages/Profile.jsx';
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
       <Route path="/predict" element={<Predict />} />
       <Route path="/tarot" element={<Tarot />} />
       <Route path="/tarot-result" element={<TarotResult />} />
+      <Route path="/profile" element={<Profile />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

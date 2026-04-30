@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useFadeNavigate } from '../lib/useFadeNavigate.js';
+import { getCurrentUser, saveUserProfile } from '../lib/auth.js';
 import './Focus.css';
 
 const AREAS = [
@@ -24,6 +25,8 @@ export default function Focus() {
   }
 
   function handleContinue() {
+    const user = getCurrentUser();
+    if (user) saveUserProfile(user.email, { focus: selected });
     fadeNavigate(`/home?${bdayQ}&focus=${selected}`);
   }
 

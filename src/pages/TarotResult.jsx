@@ -1,24 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
+import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useFadeNavigate } from '../lib/useFadeNavigate.js';
 import { getZodiac, monthNames } from '../lib/zodiac.js';
 import { deckMap, typeColors, zodiacTarotMap } from '../lib/tarot.js';
-import { getLastSent, getSavedEmail, recordSent, saveEmail, sendEmail } from '../lib/email.js';
+import { getCurrentUser, saveRecord } from '../lib/auth.js';
 import './TarotResult.css';
-
-const SENDING_SVG = (
-  <svg viewBox="0 0 24 24" style={{ animation: 'spin 1s linear infinite' }}>
-    <path d="M12 2a10 10 0 1 0 10 10" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" />
-  </svg>
-);
-const CHECK_SVG = (
-  <svg viewBox="0 0 24 24">
-    <polyline points="20 6 9 17 4 12" stroke="currentColor" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-const ENVELOPE_SVG = (
-  <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="m2 7 10 7 10-7" /></svg>
-);
 
 function MiniCardImage({ src, alt, fallback, gradient }) {
   const [failed, setFailed] = useState(false);
@@ -48,20 +35,25 @@ export default function TarotResult() {
   const rulingCard = deckMap[rulingId];
 
   const bdayQ = `name=${encodeURIComponent(name)}&day=${day}&month=${encodeURIComponent(monthStr)}&year=${year}`;
-
   const cards = cardIds.map(id => deckMap[id]).filter(Boolean);
 
-  const [emailValue, setEmailValue] = useState(getSavedEmail());
-  const [emailStatus, setEmailStatus] = useState({ text: '', kind: '' });
-  const [emailLog, setEmailLog] = useState('');
-  const [sendState, setSendState] = useState('idle');
+  const todayDate = useMemo(() =>
+    new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }), []);
+  const isoDate = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
+  // Save tarot reading to history
   useEffect(() => {
-    const last = getLastSent('tarot');
-    if (last) {
-      const d = new Date(last.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-      setEmailLog(`Last sent: ${d} → ${last.email}`);
-    }
+    const user = getCurrentUser();
+    if (!user || cards.length === 0) return;
+    saveRecord(user.email, {
+      type: 'tarot',
+      isoDate,
+      date: todayDate,
+      zodiac,
+      name: name || user.displayName,
+      cards: cards.map(c => ({ id: c.id, name: c.name, keywords: c.keywords, up: c.up, symbol: c.symbol, type: c.type })),
+      rulingCard: rulingCard ? { id: rulingCard.id, name: rulingCard.name, up: rulingCard.up } : null,
+    });
   }, []);
 
   function handleBack(e) {
@@ -73,61 +65,6 @@ export default function TarotResult() {
     e.preventDefault();
     fadeNavigate(`/home?${bdayQ}`);
   }
-
-  function buildEmailContent() {
-    const cardLines = cards.map(card => {
-      const t = card.type === 'Major' ? 'Major Arcana' : `${card.type} · Minor Arcana`;
-      return `${card.name} (${t})\n  ${card.up}`;
-    }).join('\n\n');
-    const bannerName = rulingCard ? `${rulingCard.name}  ·  ${zodiac}'s Ruling Card` : '';
-    const bannerText = rulingCard ? rulingCard.up : '';
-    return `HORA TAROT READING\n` +
-           `══════════════════════════════\n` +
-           `Name: ${name || 'You'}  |  Zodiac: ${zodiac}\n` +
-           `Date: ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}\n\n` +
-           `YOUR RULING CARD\n───────────────\n${bannerName}\n${bannerText}\n\n` +
-           `YOUR SELECTED CARDS\n───────────────────\n${cardLines}\n\n` +
-           `──────────────────────────────\nSent by HORA · Predicting ur Destiny\nhttps://thanaphumi2006.github.io/HORA-Project/`;
-  }
-
-  async function handleSend() {
-    const userEmail = emailValue.trim();
-    if (!userEmail || !userEmail.includes('@')) {
-      setEmailStatus({ text: 'Please enter a valid email address.', kind: 'error' });
-      return;
-    }
-    saveEmail(userEmail);
-    setSendState('sending');
-    setEmailStatus({ text: '', kind: '' });
-
-    const sentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    try {
-      const result = await sendEmail({
-        toName: name || 'there',
-        toEmail: userEmail,
-        subject: `Your HORA Tarot Reading · ${sentDate}`,
-        zodiac,
-        sentDate,
-        content: buildEmailContent(),
-      });
-      recordSent('tarot', userEmail);
-      setSendState('sent');
-      if (result.mode === 'mailto') {
-        setEmailStatus({ text: `Opening your email app for ${userEmail}`, kind: 'success' });
-      } else {
-        setEmailStatus({ text: `Delivered to ${userEmail}`, kind: 'success' });
-      }
-      setEmailLog(`Sent on ${sentDate}`);
-    } catch (err) {
-      setSendState('failed');
-      setEmailStatus({ text: 'Send failed — check your EmailJS config.', kind: 'error' });
-    }
-  }
-
-  let buttonContent;
-  if (sendState === 'sending') buttonContent = <>{SENDING_SVG} Sending...</>;
-  else if (sendState === 'sent') buttonContent = <>{CHECK_SVG} {emailStatus.text.startsWith('Opening') ? 'Opening Email App...' : 'Sent!'}</>;
-  else buttonContent = <>{ENVELOPE_SVG} Email My Results</>;
 
   return (
     <div className="page tarot-result-page">
@@ -183,30 +120,6 @@ export default function TarotResult() {
       </div>
 
       <a className="btn-home" href="#/" onClick={handleHome}>Back to Home</a>
-
-      <div className="email-section">
-        <div className="email-input-wrap">
-          <span className="email-input-label">Send results to</span>
-          <input
-            className="email-input-field"
-            type="email"
-            placeholder="your@email.com"
-            value={emailValue}
-            onChange={(e) => setEmailValue(e.target.value)}
-          />
-        </div>
-        <button
-          className="btn-send-email"
-          onClick={handleSend}
-          disabled={sendState === 'sending' || sendState === 'sent'}
-        >
-          {buttonContent}
-        </button>
-        {emailStatus.text && (
-          <div className={`email-status ${emailStatus.kind}`}>{emailStatus.text}</div>
-        )}
-        {emailLog && <div className="email-log">{emailLog}</div>}
-      </div>
     </div>
   );
 }

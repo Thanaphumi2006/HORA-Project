@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useFadeNavigate } from '../lib/useFadeNavigate.js';
 import { monthNames } from '../lib/zodiac.js';
+import { getCurrentUser, saveUserProfile } from '../lib/auth.js';
 import './Birthday.css';
 
 const ITEM_H = 44;
@@ -43,6 +44,8 @@ export default function Birthday() {
     const day = getSelected(dayRef, days);
     const month = getSelected(monthRef, monthNames);
     const year = getSelected(yearRef, years);
+    const user = getCurrentUser();
+    if (user) saveUserProfile(user.email, { day, month, year });
     fadeNavigate(
       `/question?name=${encodeURIComponent(name)}&day=${day}&month=${encodeURIComponent(month)}&year=${year}`
     );

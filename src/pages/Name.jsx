@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useFadeNavigate } from '../lib/useFadeNavigate.js';
+import { getCurrentUser, saveUserProfile } from '../lib/auth.js';
 import './Name.css';
 
 export default function Name() {
@@ -16,6 +17,8 @@ export default function Name() {
   function handleContinue() {
     const name = value.trim();
     if (!name) return;
+    const user = getCurrentUser();
+    if (user) saveUserProfile(user.email, { displayName: name });
     fadeNavigate(`/birthday?name=${encodeURIComponent(name)}`);
   }
 

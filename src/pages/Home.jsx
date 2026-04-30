@@ -4,6 +4,7 @@ import { useFadeNavigate } from '../lib/useFadeNavigate.js';
 import { getZodiac, monthNames } from '../lib/zodiac.js';
 import { zodiacHoroscope } from '../lib/horoscope.js';
 import { zodiacTarotData } from '../lib/tarot.js';
+import { authSignOut } from '../lib/auth.js';
 import './Home.css';
 
 export default function Home() {
@@ -69,7 +70,13 @@ export default function Home() {
 
   function handleSignOut(e) {
     e.preventDefault();
+    authSignOut();
     fadeNavigate('/');
+  }
+
+  function handleProfile(e) {
+    e.preventDefault();
+    fadeNavigate(`/profile?${bdayQ}`);
   }
 
   function openPredict() {
@@ -83,10 +90,16 @@ export default function Home() {
   return (
     <div className="page home-page">
       <div className="header">
-        <a className="btn-signout" href="#/" onClick={handleSignOut}>
-          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
-          Sign Out
-        </a>
+        <div className="header-actions">
+          <a className="btn-profile" href="#/" onClick={handleProfile}>
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" /><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" /></svg>
+            Profile
+          </a>
+          <a className="btn-signout" href="#/" onClick={handleSignOut}>
+            <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
+            Sign Out
+          </a>
+        </div>
         <div className="greeting">Hi <span>{name}</span></div>
         <div className="subtitle">Here is your today prediction</div>
         <div className="zodiac-badge">✦ <span>{zodiac}</span></div>

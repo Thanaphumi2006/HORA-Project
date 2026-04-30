@@ -1,26 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useFadeNavigate } from '../lib/useFadeNavigate.js';
 import { getZodiac, lifePathNumber, monthNames } from '../lib/zodiac.js';
 import { focusLabels, lpnColors, zodiacFocusPredictions } from '../lib/horoscope.js';
-import { getLastSent, getSavedEmail, recordSent, saveEmail, sendEmail } from '../lib/email.js';
+import { getCurrentUser, saveRecord } from '../lib/auth.js';
 import './Predict.css';
-
-const SENDING_SVG = (
-  <svg viewBox="0 0 24 24" style={{ animation: 'spin 1s linear infinite' }}>
-    <path d="M12 2a10 10 0 1 0 10 10" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" />
-  </svg>
-);
-
-const CHECK_SVG = (
-  <svg viewBox="0 0 24 24">
-    <polyline points="20 6 9 17 4 12" stroke="currentColor" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-const ENVELOPE_SVG = (
-  <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="m2 7 10 7 10-7" /></svg>
-);
 
 export default function Predict() {
   const fadeNavigate = useFadeNavigate();
@@ -39,79 +23,35 @@ export default function Predict() {
   const todayDate = useMemo(() =>
     new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
   []);
+  const isoDate = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
   const focusPoints = zodiacFocusPredictions[focus] || zodiacFocusPredictions.love;
   const points = focusPoints[zodiac] || focusPoints.Pisces;
   const recs = lpnColors[lpn] || lpnColors[9];
   const focusLabel = focusLabels[focus] || focus;
 
-  const [emailValue, setEmailValue] = useState(getSavedEmail());
-  const [emailStatus, setEmailStatus] = useState({ text: '', kind: '' });
-  const [emailLog, setEmailLog] = useState('');
-  const [sendState, setSendState] = useState('idle'); // idle | sending | sent | failed
-
+  // Save to history once per day per focus
   useEffect(() => {
-    const last = getLastSent('prediction');
-    if (last) {
-      const d = new Date(last.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-      setEmailLog(`Last sent: ${d} → ${last.email}`);
-    }
+    const user = getCurrentUser();
+    if (!user) return;
+    saveRecord(user.email, {
+      type: 'daily',
+      isoDate,
+      date: todayDate,
+      zodiac,
+      focus,
+      focusLabel,
+      name: name || user.displayName,
+      predictions: points,
+      lpn,
+      luckyColors: recs,
+    });
   }, []);
 
   function handleBack(e) {
     e.preventDefault();
     fadeNavigate(`/home?name=${encodeURIComponent(name)}&day=${day}&month=${encodeURIComponent(monthStr)}&year=${year}&focus=${focus}`);
   }
-
-  function buildEmailContent() {
-    const rLines = recs.map(r => `• ${r.name} · ${r.meaning}\n  ${r.action}`).join('\n');
-    return `HORA DAILY ${focus.toUpperCase()} PREDICTION\n` +
-           `══════════════════════════════\n` +
-           `Name: ${name || 'You'}  |  Zodiac: ${zodiac}  |  Focus: ${focusLabel}\n` +
-           `Date: ${todayDate}\n\n` +
-           `YOUR PREDICTION\n───────────────\n${points[0]}\n\n${points[1]}\n\n${points[2]}\n\n` +
-           `LUCKY COLORS · LIFE PATH ${lpn}\n───────────────────────────\n${rLines}\n\n` +
-           `──────────────────────────────\nSent by HORA · Predicting ur Destiny\nhttps://thanaphumi2006.github.io/HORA-Project/`;
-  }
-
-  async function handleSend() {
-    const userEmail = emailValue.trim();
-    if (!userEmail || !userEmail.includes('@')) {
-      setEmailStatus({ text: 'Please enter a valid email address.', kind: 'error' });
-      return;
-    }
-    saveEmail(userEmail);
-    setSendState('sending');
-    setEmailStatus({ text: '', kind: '' });
-
-    const sentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    try {
-      const result = await sendEmail({
-        toName: name || 'there',
-        toEmail: userEmail,
-        subject: `Your HORA ${focusLabel} Prediction · ${sentDate}`,
-        zodiac,
-        sentDate,
-        content: buildEmailContent(),
-      });
-      recordSent('prediction', userEmail);
-      setSendState('sent');
-      if (result.mode === 'mailto') {
-        setEmailStatus({ text: `Opening your email app for ${userEmail}`, kind: 'success' });
-      } else {
-        setEmailStatus({ text: `Delivered to ${userEmail}`, kind: 'success' });
-      }
-      setEmailLog(`Sent on ${sentDate}`);
-    } catch (err) {
-      setSendState('failed');
-      setEmailStatus({ text: 'Send failed — check your EmailJS config.', kind: 'error' });
-    }
-  }
-
-  let buttonContent;
-  if (sendState === 'sending') buttonContent = <>{SENDING_SVG} Sending...</>;
-  else if (sendState === 'sent') buttonContent = <>{CHECK_SVG} {emailStatus.text.startsWith('Opening') ? 'Opening Email App...' : 'Sent!'}</>;
-  else buttonContent = <>{ENVELOPE_SVG} Email My Results</>;
 
   return (
     <div className="page predict-page">
@@ -146,30 +86,6 @@ export default function Predict() {
             </div>
           </div>
         ))}
-      </div>
-
-      <div className="email-section">
-        <div className="email-input-wrap">
-          <span className="email-input-label">Send results to</span>
-          <input
-            className="email-input-field"
-            type="email"
-            placeholder="your@email.com"
-            value={emailValue}
-            onChange={(e) => setEmailValue(e.target.value)}
-          />
-        </div>
-        <button
-          className="btn-send-email"
-          onClick={handleSend}
-          disabled={sendState === 'sending' || sendState === 'sent'}
-        >
-          {buttonContent}
-        </button>
-        {emailStatus.text && (
-          <div className={`email-status ${emailStatus.kind}`}>{emailStatus.text}</div>
-        )}
-        {emailLog && <div className="email-log">{emailLog}</div>}
       </div>
     </div>
   );
