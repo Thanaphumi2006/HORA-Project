@@ -1,6 +1,6 @@
 # HORA — Predicting ur Destiny
 
-HORA is a browser-based astrology and tarot reading web app. Enter your name and birthday to receive a daily horoscope prediction and a tarot card reading based on your zodiac sign.
+HORA is a React-based astrology and tarot reading web app. Enter your name and birthday to receive a daily horoscope prediction and a tarot card reading based on your zodiac sign.
 
 ## Live App
 
@@ -10,89 +10,99 @@ No download or installation needed — just open the link in your browser.
 
 ---
 
-## Run Locally (Optional)
+## Tech Stack
 
-### Step 1 — Download the project
-
-1. Go to [https://github.com/Thanaphumi2006/HORA-Project](https://github.com/Thanaphumi2006/HORA-Project)
-2. Click the green **Code** button → **Download ZIP**
-3. Extract (unzip) the folder anywhere on your computer
+- **React 18** + **React Router** (HashRouter for static-host friendly routing)
+- **Vite** for build + dev server
+- **EmailJS** for emailing predictions/tarot results
+- Static deploy via **GitHub Actions → GitHub Pages**
 
 ---
 
-### Step 2 — Install Python (only needed once)
+## Run Locally
 
-HORA uses a small Python script to open the app in your browser. Python is free and takes ~1 minute to install.
+You need **Node.js 18+** ([nodejs.org](https://nodejs.org)).
 
-| Your System | Download Link |
-|-------------|---------------|
-| Windows | [python.org/downloads](https://www.python.org/downloads/) |
-| macOS | [python.org/downloads](https://www.python.org/downloads/) or run `brew install python3` |
-| Linux | Run `sudo apt install python3` in your terminal |
-
-> **Windows users:** During installation, check the box that says **"Add Python to PATH"**
-
-To check if Python is already installed, open a terminal and type:
+```bash
+npm install
+npm run dev
 ```
-python --version
+
+The dev server opens at `http://localhost:8080`.
+
+To build a production bundle:
+
+```bash
+npm run build
+npm run preview   # serve the production bundle locally
 ```
-If you see a version number, you are ready.
 
 ---
 
-### Step 3 — Launch the app
+## Project Structure
 
-| Your System | What to do |
-|-------------|------------|
-| **Windows** | Double-click `start.bat` |
-| **macOS / Linux** | Open Terminal in the folder, run `bash start.sh` |
-| **Any system** | Open Terminal/Command Prompt in the folder, run `python start.py` |
+```
+src/
+├── main.jsx            # React entry, sets up HashRouter
+├── App.jsx             # Routes
+├── styles.css          # Global font, transitions, reset
+├── lib/
+│   ├── zodiac.js          # getZodiac, lifePathNumber
+│   ├── horoscope.js       # zodiacFocusPredictions, lpnColors
+│   ├── tarot.js           # full deck data + helpers
+│   ├── email.js           # EmailJS wrapper + log helpers
+│   └── useFadeNavigate.js # page-out fade hook
+└── pages/
+    ├── Login.jsx          # Loading splash + sign in
+    ├── Name.jsx           # Enter your name
+    ├── Birthday.jsx       # Wheel-style birthday picker
+    ├── Question.jsx       # Transitional "Question" screen
+    ├── Focus.jsx          # Pick focus area
+    ├── Home.jsx           # Dashboard (horoscope + tarot)
+    ├── Predict.jsx        # Detailed daily prediction
+    ├── Tarot.jsx          # Card-flip selection
+    └── TarotResult.jsx    # Selected-card meanings
+```
 
-The app will automatically open in your browser at `http://localhost:8080`.
-
----
-
-## How to Use the App
-
-1. **Loading Screen** — Click anywhere or press any key to continue
-2. **Sign In** — Enter any email and password, then click **Sign In**
-3. **Enter Your Name** — Type your name and press Next
-4. **Enter Your Birthday** — Select your birth day, month, and year
-5. **Choose a Focus** — Pick an area of life (Love, Career, etc.)
-6. **Home Page** — Two cards appear:
-   - **Today Prediction** — Your daily horoscope based on your zodiac sign
-   - **Tarot Reading** — Your zodiac's ruling tarot card
-7. **Click either card** to explore deeper readings
-
----
-
-## Stopping the App
-
-Press **Ctrl+C** in the terminal window to stop the server.
+State flows between pages via URL search params (`useSearchParams`), preserving the original site's link-shareable behavior.
 
 ---
 
-## Pages
+## Routes
 
-| File | Description |
-|------|-------------|
-| `index.html` | Loading screen + Sign In |
-| `name.html` | Enter your name |
-| `birthday.html` | Enter your birthday |
-| `focus.html` | Choose your focus area |
-| `home.html` | Main dashboard (horoscope + tarot) |
-| `predict.html` | Detailed daily prediction |
-| `question.html` | Ask a question |
-| `tarot.html` | Tarot card selection |
-| `tarotresult.html` | Tarot card result |
+| Path             | Page                                     |
+|------------------|------------------------------------------|
+| `/`              | Loading + sign in                        |
+| `/name`          | Enter name                               |
+| `/birthday`      | Pick birthday                            |
+| `/question`      | Question prompt                          |
+| `/focus`         | Pick focus area (love/work/health/social)|
+| `/home`          | Dashboard                                |
+| `/predict`       | Detailed prediction                      |
+| `/tarot`         | Tarot card selection                     |
+| `/tarot-result`  | Tarot card meanings                      |
 
 ---
 
-## Notes
+## Email Configuration (Optional)
 
-- No account or sign-up is required — any email/password works on the login screen
-- Works best on **Google Chrome**, **Firefox**, or **Edge**
-- An internet connection improves predictions with live horoscope data, but the app works offline too
+Out of the box, the email button uses a `mailto:` fallback. To send via EmailJS, fill in `src/lib/email.js`:
+
+```js
+export const EMAILJS_PUBLIC_KEY  = '...';
+export const EMAILJS_SERVICE_ID  = '...';
+export const EMAILJS_TEMPLATE_ID = '...';
+```
+
+Sign up at [emailjs.com](https://emailjs.com), create a Gmail service + a template using `{{to_name}}`, `{{to_email}}`, `{{subject}}`, `{{zodiac}}`, `{{sent_date}}`, `{{content}}`.
+
+---
+
+## Deployment
+
+Pushing to `main` triggers `.github/workflows/deploy.yml`, which builds the Vite app and publishes `dist/` via GitHub Pages.
+
+To enable: in the repository's GitHub settings, **Pages → Build and deployment → Source: GitHub Actions**.
 
 ---
 
