@@ -109,6 +109,8 @@ export default function Question() {
   const [orientation, setOrientation] = useState('upright');
   const [revealed, setRevealed] = useState(false);
 
+  const focus = params.get('focus') || '';
+  const fromHome = Boolean(focus);
   const bdayQ = `name=${encodeURIComponent(params.get('name') || '')}&day=${params.get('day') || ''}&month=${encodeURIComponent(params.get('month') || '')}&year=${params.get('year') || ''}`;
 
   const step = card ? 2 : (topic ? 1 : 0);
@@ -128,16 +130,27 @@ export default function Question() {
   }
 
   function handleContinue() {
-    fadeNavigate(`/focus?${bdayQ}`);
+    if (fromHome) {
+      fadeNavigate(`/home?${bdayQ}&focus=${focus}`);
+    } else {
+      fadeNavigate(`/focus?${bdayQ}`);
+    }
   }
 
   function handleSkip() {
-    fadeNavigate(`/home?${bdayQ}`);
+    if (fromHome) {
+      fadeNavigate(`/home?${bdayQ}&focus=${focus}`);
+    } else {
+      fadeNavigate(`/home?${bdayQ}`);
+    }
   }
 
   return (
     <div className="page question-page">
       <div className="question-text">
+        {fromHome && (
+          <button className="btn-skip q-back-home" onClick={handleSkip}>← Back</button>
+        )}
         <h1>Question</h1>
         <div className="progress-bar">
           <div className={`progress-dot step-${step}`}></div>
@@ -209,7 +222,9 @@ export default function Question() {
               </div>
             </div>
 
-            <button className="btn-continue" onClick={handleContinue}>Continue</button>
+            <button className="btn-continue" onClick={handleContinue}>
+              {fromHome ? 'Done' : 'Continue'}
+            </button>
           </div>
         )}
       </div>

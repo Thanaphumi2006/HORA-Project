@@ -121,6 +121,17 @@ export default function Home() {
           <svg className="compat-banner-arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>
         </div>
 
+        <div className="compat-banner" onClick={() => fadeNavigate(`/question?${bdayQ}&focus=${focus}`)}>
+          <div className="compat-banner-left">
+            <span className="compat-banner-icon">🔮</span>
+            <div>
+              <div className="compat-banner-title">Ask a Question</div>
+              <div className="compat-banner-sub">Draw a card for guidance on what's on your mind</div>
+            </div>
+          </div>
+          <svg className="compat-banner-arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>
+        </div>
+
         <div className="circle-card" onClick={openPredict}>
           <div className="circle-label">
             <span className="circle-icon">✦</span>

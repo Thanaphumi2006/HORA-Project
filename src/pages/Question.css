@@ -183,6 +183,12 @@
 
 .question-page .btn-skip:hover { color: #1a6568; }
 
+.question-page .q-back-home {
+  align-self: flex-start;
+  margin-bottom: 4px;
+  margin-top: 0;
+}
+
 /* Reveal phase */
 .question-page .q-reveal {
   width: 100%;
