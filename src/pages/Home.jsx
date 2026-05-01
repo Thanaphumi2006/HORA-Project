@@ -87,6 +87,10 @@ export default function Home() {
     fadeNavigate(`/tarot?${bdayQ}`);
   }
 
+  function openCompatibility() {
+    fadeNavigate(`/compatibility?${bdayQ}`);
+  }
+
   return (
     <div className="page home-page">
       <div className="header">
@@ -106,6 +110,17 @@ export default function Home() {
       </div>
 
       <div className="circles-wrap">
+        <div className="compat-banner" onClick={openCompatibility}>
+          <div className="compat-banner-left">
+            <span className="compat-banner-icon">◈</span>
+            <div>
+              <div className="compat-banner-title">Compatibility Check</div>
+              <div className="compat-banner-sub">See how your stars align with a friend</div>
+            </div>
+          </div>
+          <svg className="compat-banner-arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>
+        </div>
+
         <div className="circle-card" onClick={openPredict}>
           <div className="circle-label">
             <span className="circle-icon">✦</span>

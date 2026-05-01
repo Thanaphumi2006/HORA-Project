@@ -77,6 +77,19 @@ export function updateDisplayName(email, displayName) {
   saveUserProfile(email, { displayName: name });
 }
 
+export function getAutoLoginProfile() {
+  const session = getCurrentUser();
+  if (!session) return null;
+  const users = getUsers();
+  const userData = users[session.email];
+  if (!userData) return null;
+  const profile = userData.profile;
+  if (!profile || !profile.day || !profile.month || !profile.year) return null;
+  const displayName = profile.displayName || userData.displayName || session.displayName || '';
+  if (!displayName) return null;
+  return { ...profile, displayName };
+}
+
 // ── Prediction history ───────────────────────────────────────────
 
 export function getHistory(email) {

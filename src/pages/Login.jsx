@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useFadeNavigate } from '../lib/useFadeNavigate.js';
-import { authSignIn, authSignUp } from '../lib/auth.js';
+import { authSignIn, authSignUp, getAutoLoginProfile } from '../lib/auth.js';
 import './Login.css';
 
 function buildHomeUrl(profile) {
@@ -11,8 +11,13 @@ function buildHomeUrl(profile) {
 export default function Login() {
   const fadeNavigate = useFadeNavigate();
   const [mode, setMode] = useState('signin'); // 'signin' | 'signup'
-  const [showLoading, setShowLoading] = useState(true);
+  const [showLoading, setShowLoading] = useState(() => getAutoLoginProfile() === null);
   const [loadingHidden, setLoadingHidden] = useState(false);
+
+  useEffect(() => {
+    const profile = getAutoLoginProfile();
+    if (profile) fadeNavigate(buildHomeUrl(profile));
+  }, []);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

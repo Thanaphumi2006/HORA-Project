@@ -1,7 +1,7 @@
 .home-page {
   min-height: 100vh;
   background: linear-gradient(180deg, #c9f0ef 0%, #a8e4e3 40%, #b8eceb 100%);
-  overflow: hidden;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
 }
@@ -234,4 +234,62 @@
   color: rgba(29, 110, 113, 0.82);
   text-transform: uppercase;
   text-align: center;
+}
+
+.home-page .compat-banner {
+  width: 100%;
+  max-width: 320px;
+  background: rgba(255, 255, 255, 0.38);
+  backdrop-filter: blur(16px);
+  border-radius: 20px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: background 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: 0 4px 20px rgba(100, 180, 185, 0.12);
+}
+
+.home-page .compat-banner:hover {
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 8px 32px rgba(100, 180, 185, 0.22);
+}
+
+.home-page .compat-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.home-page .compat-banner-icon {
+  font-size: 24px;
+  color: rgba(29, 110, 113, 0.87);
+  flex-shrink: 0;
+}
+
+.home-page .compat-banner-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #1a6568;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+
+.home-page .compat-banner-sub {
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: rgba(29, 110, 113, 0.78);
+}
+
+.home-page .compat-banner-arrow {
+  width: 16px;
+  height: 16px;
+  stroke: rgba(29, 110, 113, 0.6);
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
 }
