@@ -10,6 +10,7 @@ import './Home.css';
 export default function Home() {
   const fadeNavigate = useFadeNavigate();
   const [params, setParams] = useSearchParams();
+  const [expanded, setExpanded] = useState(null);
 
   const name = params.get('name') || 'there';
   const day = parseInt(params.get('day')) || new Date().getDate();
@@ -151,25 +152,36 @@ export default function Home() {
           <svg className="compat-banner-arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>
         </div>
 
-        <div className="circle-card" onClick={openPredict}>
+        <div
+          className={`circle-card${expanded === 'predict' ? ' expanded' : ''}`}
+          onClick={() => setExpanded(prev => prev === 'predict' ? null : 'predict')}
+        >
           <div className="circle-label">
             <span className="circle-icon">✦</span>
             <span className="circle-title">Today<br />Prediction</span>
+            <span className="circle-cta">Click here to view prediction</span>
           </div>
           <div className="circle-content">
             <div className="content-title">Today Prediction</div>
             <div className="content-tag">{zodiac}</div>
             <div className="content-divider"></div>
             <div className="content-body">{horoscope}</div>
+            <button className="circle-nav-btn" onClick={(e) => { e.stopPropagation(); openPredict(); }}>
+              View Full Prediction →
+            </button>
           </div>
         </div>
 
-        <div className="circle-card" onClick={openTarot}>
+        <div
+          className={`circle-card${expanded === 'tarot' ? ' expanded' : ''}`}
+          onClick={() => setExpanded(prev => prev === 'tarot' ? null : 'tarot')}
+        >
           <div className="circle-label">
             <span className="circle-icon">🜁</span>
             <span className="circle-title">Tarot Reading</span>
             <span className="circle-card-name">{tarotMeanings.name}</span>
             <span className="circle-card-sub">{zodiac}'s Ruling Card</span>
+            <span className="circle-cta">Click here to view or pick the card</span>
           </div>
           <div className="circle-content">
             <div className="content-title">Tarot Reading</div>
@@ -183,6 +195,9 @@ export default function Home() {
               <span className="section-label">Reversed</span>
               <span>{tarotMeanings.rev}</span>
             </div>
+            <button className="circle-nav-btn" onClick={(e) => { e.stopPropagation(); openTarot(); }}>
+              Pick Your Cards →
+            </button>
           </div>
         </div>
       </div>
