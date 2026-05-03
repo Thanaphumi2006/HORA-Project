@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useFadeNavigate } from '../lib/useFadeNavigate.js';
-import { getCurrentUser, getHistory, authSignOut, updateDisplayName } from '../lib/auth.js';
+import { getCurrentUser, getHistory, authSignOut, updateDisplayName, deleteAccount } from '../lib/auth.js';
 import './Profile.css';
 
 const FOCUS_EMOJI = { love: '💖', work: '💼', health: '🌿', social: '🌟' };
@@ -84,6 +84,7 @@ export default function Profile() {
   const [renaming, setRenaming] = useState(false);
   const [newName, setNewName] = useState(user?.displayName || '');
   const [renameSaved, setRenameSaved] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   function handleRename() {
     const trimmed = newName.trim();
@@ -111,6 +112,11 @@ export default function Profile() {
   function handleSignOut(e) {
     e.preventDefault();
     authSignOut();
+    fadeNavigate('/');
+  }
+
+  function handleDeleteAccount() {
+    deleteAccount(user.email);
     fadeNavigate('/');
   }
 
@@ -196,6 +202,22 @@ export default function Profile() {
           )}
         </div>
       )}
+
+      <div className="prof-danger-zone">
+        {!confirmDelete ? (
+          <button className="btn-delete-account" onClick={() => setConfirmDelete(true)}>
+            Delete Account
+          </button>
+        ) : (
+          <div className="prof-delete-confirm">
+            <p className="prof-delete-warning">This will permanently delete your account and all reading history. This cannot be undone.</p>
+            <div className="prof-delete-actions">
+              <button className="btn-delete-confirm" onClick={handleDeleteAccount}>Yes, Delete</button>
+              <button className="btn-delete-cancel" onClick={() => setConfirmDelete(false)}>Cancel</button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

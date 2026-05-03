@@ -102,6 +102,19 @@ export default function Home() {
 
   return (
     <div className="page home-page">
+      <div className="home-orbit home-orbit-left" aria-hidden="true">
+        <div className="ho-sun"></div>
+        <div className="ho-ring ho-ring-1"></div>
+        <div className="ho-ring ho-ring-2"></div>
+        <div className="ho-ring ho-ring-3"></div>
+      </div>
+      <div className="home-orbit home-orbit-right" aria-hidden="true">
+        <div className="ho-sun"></div>
+        <div className="ho-ring ho-ring-1"></div>
+        <div className="ho-ring ho-ring-2"></div>
+        <div className="ho-ring ho-ring-3"></div>
+      </div>
+
       <div className="header">
         <div className="header-actions">
           <a className="btn-profile" href="#/" onClick={handleProfile}>

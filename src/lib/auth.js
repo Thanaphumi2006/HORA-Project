@@ -77,6 +77,15 @@ export function updateDisplayName(email, displayName) {
   saveUserProfile(email, { displayName: name });
 }
 
+export function deleteAccount(email) {
+  const key = email.toLowerCase().trim();
+  const users = getUsers();
+  delete users[key];
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+  localStorage.removeItem(historyKey(key));
+  localStorage.removeItem(SESSION_KEY);
+}
+
 export function getAutoLoginProfile() {
   const session = getCurrentUser();
   if (!session) return null;

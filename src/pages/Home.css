@@ -295,6 +295,86 @@
 
 .home-page .circle-nav-btn:hover { background: rgba(29, 110, 113, 0.22); }
 
+/* ── Star orbit decorations ──────────────────────────────── */
+
+.home-page .home-orbit {
+  position: fixed;
+  width: 320px;
+  height: 320px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.home-page .home-orbit-left {
+  left: -160px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.22;
+}
+
+.home-page .home-orbit-right {
+  right: -160px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.18;
+}
+
+.home-page .ho-sun {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 35%, #b8eceb, #5aabae);
+  box-shadow: 0 0 16px 6px rgba(90, 171, 174, 0.4);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.home-page .ho-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(90, 171, 174, 0.35);
+}
+
+.home-page .ho-ring::before {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff, #7bbcbf);
+  box-shadow: 0 0 8px 3px rgba(255,255,255,0.8), 0 0 14px 5px rgba(123,188,191,0.5);
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.home-page .ho-ring-1 {
+  inset: 40px;
+  animation: ho-spin 5s linear infinite;
+}
+.home-page .ho-ring-1::before { width: 9px; height: 9px; }
+
+.home-page .ho-ring-2 {
+  inset: 14px;
+  border-color: rgba(90, 171, 174, 0.22);
+  animation: ho-spin 8s linear infinite reverse;
+}
+.home-page .ho-ring-2::before { width: 7px; height: 7px; }
+
+.home-page .ho-ring-3 {
+  inset: 0;
+  border-color: rgba(90, 171, 174, 0.14);
+  animation: ho-spin 12s linear infinite;
+}
+.home-page .ho-ring-3::before { width: 5px; height: 5px; }
+
+@keyframes ho-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ──────────────────────────────────────────────────────── */
+
 .home-page .compat-banner {
   width: 100%;
   max-width: 320px;

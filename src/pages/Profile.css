@@ -422,3 +422,87 @@
   color: #1a6568;
   font-size: 14px;
 }
+
+/* Delete account */
+.profile-page .prof-danger-zone {
+  margin: 32px 24px 0;
+  padding-top: 24px;
+  border-top: 1px solid rgba(100,185,188,0.2);
+}
+
+.profile-page .btn-delete-account {
+  width: 100%;
+  background: none;
+  border: 1.5px solid rgba(200, 60, 60, 0.35);
+  border-radius: 50px;
+  padding: 13px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: rgba(200, 60, 60, 0.75);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.profile-page .btn-delete-account:hover {
+  background: rgba(200, 60, 60, 0.08);
+  border-color: rgba(200, 60, 60, 0.6);
+  color: rgba(200, 60, 60, 1);
+}
+
+.profile-page .prof-delete-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.profile-page .prof-delete-warning {
+  font-size: 12px;
+  line-height: 1.7;
+  color: rgba(200, 60, 60, 0.85);
+  margin: 0;
+  text-align: center;
+}
+
+.profile-page .prof-delete-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.profile-page .btn-delete-confirm {
+  flex: 1;
+  background: rgba(200, 60, 60, 0.12);
+  border: 1.5px solid rgba(200, 60, 60, 0.5);
+  border-radius: 50px;
+  padding: 12px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: rgba(200, 60, 60, 0.9);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.profile-page .btn-delete-confirm:hover { background: rgba(200, 60, 60, 0.22); }
+
+.profile-page .btn-delete-cancel {
+  flex: 1;
+  background: rgba(255,255,255,0.35);
+  border: 1.5px solid rgba(100,185,188,0.4);
+  border-radius: 50px;
+  padding: 12px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #1a6568;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.profile-page .btn-delete-cancel:hover { background: rgba(255,255,255,0.55); }
