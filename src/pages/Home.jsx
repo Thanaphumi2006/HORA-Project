@@ -4,12 +4,12 @@ import { useFadeNavigate } from '../lib/useFadeNavigate.js';
 import { getZodiac, monthNames } from '../lib/zodiac.js';
 import { zodiacHoroscope } from '../lib/horoscope.js';
 import { zodiacTarotData } from '../lib/tarot.js';
-import { authSignOut } from '../lib/auth.js';
+import { authSignOut, getCurrentUser, saveUserProfile } from '../lib/auth.js';
 import './Home.css';
 
 export default function Home() {
   const fadeNavigate = useFadeNavigate();
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
 
   const name = params.get('name') || 'there';
   const day = parseInt(params.get('day')) || new Date().getDate();
@@ -68,6 +68,14 @@ export default function Home() {
 
   const bdayQ = `name=${encodeURIComponent(name)}&day=${day}&month=${encodeURIComponent(monthStr)}&year=${year}`;
 
+  function changeFocus(newFocus) {
+    const user = getCurrentUser();
+    if (user) saveUserProfile(user.email, { focus: newFocus });
+    const next = new URLSearchParams(params);
+    next.set('focus', newFocus);
+    setParams(next, { replace: true });
+  }
+
   function handleSignOut(e) {
     e.preventDefault();
     authSignOut();
@@ -107,6 +115,17 @@ export default function Home() {
         <div className="greeting">Hi <span>{name}</span></div>
         <div className="subtitle">Here is your today prediction</div>
         <div className="zodiac-badge">✦ <span>{zodiac}</span></div>
+        <div className="focus-pills">
+          {['love', 'work', 'health', 'social'].map(f => (
+            <button
+              key={f}
+              className={`home-focus-pill ${f}${focus === f ? ' active' : ''}`}
+              onClick={() => changeFocus(f)}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="circles-wrap">

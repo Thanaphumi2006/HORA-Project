@@ -70,6 +70,36 @@
   text-transform: uppercase;
 }
 
+.home-page .focus-pills {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.home-page .home-focus-pill {
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  opacity: 0.45;
+  color: #fff;
+}
+
+.home-page .home-focus-pill.active { opacity: 1; transform: scale(1.05); }
+.home-page .home-focus-pill:hover  { opacity: 0.8; }
+
+.home-page .home-focus-pill.love    { background: rgba(220, 80, 120, 0.65); }
+.home-page .home-focus-pill.work    { background: rgba(61, 144, 147, 0.75); }
+.home-page .home-focus-pill.health  { background: rgba(80, 180, 100, 0.65); }
+.home-page .home-focus-pill.social  { background: rgba(130, 90, 200, 0.65); }
+
 .home-page .circles-wrap {
   flex: 1;
   display: flex;
