@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useFadeNavigate } from '../lib/useFadeNavigate.js';
 import { getZodiac, monthNames } from '../lib/zodiac.js';
-import { getCompatibility, zodiacSymbols } from '../lib/compatibility.js';
+import { getCompatibility } from '../lib/compatibility.js';
+import { ZodiacSymbol } from '../lib/ZodiacSymbols.jsx';
 import './Compatibility.css';
 
 const days = Array.from({ length: 31 }, (_, i) => i + 1);
@@ -64,7 +65,9 @@ export default function Compatibility() {
       {!result ? (
         <div className="compat-form">
           <div className="your-sign-card">
-            <div className="sign-symbol">{zodiacSymbols[userZodiac]}</div>
+            <div className="sign-symbol">
+              <ZodiacSymbol sign={userZodiac} size={28} />
+            </div>
             <div className="sign-info">
               <div className="sign-label">Your Sign</div>
               <div className="sign-name">{userZodiac}</div>
@@ -119,7 +122,9 @@ export default function Compatibility() {
         <div className="compat-results">
           <div className="signs-row">
             <div className="sign-block">
-              <div className="result-symbol">{result.symbol1}</div>
+              <div className="result-symbol">
+                <ZodiacSymbol sign={userZodiac} size={32} />
+              </div>
               <div className="result-sign">{userZodiac}</div>
               <div className="result-owner">{name}</div>
             </div>
@@ -128,7 +133,9 @@ export default function Compatibility() {
               <div className="overall-label">Match</div>
             </div>
             <div className="sign-block">
-              <div className="result-symbol">{result.symbol2}</div>
+              <div className="result-symbol">
+                <ZodiacSymbol sign={result.friendZodiac} size={32} />
+              </div>
               <div className="result-sign">{result.friendZodiac}</div>
               <div className="result-owner">{result.friendDisplayName}</div>
             </div>

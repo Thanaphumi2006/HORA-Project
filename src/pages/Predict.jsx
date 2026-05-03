@@ -4,6 +4,7 @@ import { useFadeNavigate } from '../lib/useFadeNavigate.js';
 import { getZodiac, lifePathNumber, monthNames } from '../lib/zodiac.js';
 import { focusLabels, lpnColors, zodiacFocusPredictions, zodiacWeeklyForecast } from '../lib/horoscope.js';
 import { getCurrentUser, saveRecord } from '../lib/auth.js';
+import { ZodiacSymbol } from '../lib/ZodiacSymbols.jsx';
 import './Predict.css';
 
 function ShareButton({ text, title }) {
@@ -103,7 +104,10 @@ export default function Predict() {
       </div>
 
       <div className="zodiac-row">
-        <span className="zodiac-pill">{zodiac}</span>
+        <span className="zodiac-pill">
+          <span className="zodiac-pill-icon"><ZodiacSymbol sign={zodiac} size={14} /></span>
+          {zodiac}
+        </span>
         <span className={`focus-pill ${focus}`}>{focusLabel}</span>
         <span className="today-date">{todayDate}</span>
       </div>

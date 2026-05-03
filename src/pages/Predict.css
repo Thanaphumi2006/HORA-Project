@@ -135,13 +135,28 @@
 }
 
 .predict-page .zodiac-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 10px;
   letter-spacing: 2px;
   color: rgba(29, 110, 113, 0.91);
   text-transform: uppercase;
   background: rgba(255, 255, 255, 0.4);
-  padding: 4px 12px;
+  padding: 4px 12px 4px 5px;
   border-radius: 20px;
+}
+.predict-page .zodiac-pill-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #111, #282828);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.22);
 }
 
 .predict-page .focus-pill {

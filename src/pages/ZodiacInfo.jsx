@@ -1,6 +1,7 @@
 import { useSearchParams } from 'react-router-dom';
 import { useFadeNavigate } from '../lib/useFadeNavigate.js';
 import { zodiacInfoData, elementColors } from '../lib/zodiacinfo.js';
+import { ZodiacSymbol } from '../lib/ZodiacSymbols.jsx';
 import './ZodiacInfo.css';
 
 export default function ZodiacInfo() {
@@ -35,7 +36,9 @@ export default function ZodiacInfo() {
       </div>
 
       <div className="zi-hero">
-        <div className="zi-symbol-big" style={{ color: info.color }}>{info.symbol}</div>
+        <div className="zi-symbol-big">
+          <ZodiacSymbol sign={zodiac} size={60} />
+        </div>
         <div className="zi-dates">{info.dates}</div>
         <div className="zi-badges">
           <span className="zi-badge" style={{ background: ec.bg, border: `1px solid ${ec.border}`, color: ec.text }}>
@@ -69,8 +72,10 @@ export default function ZodiacInfo() {
         {info.compatible.map(sign => {
           const s = zodiacInfoData[sign];
           return (
-            <div key={sign} className="zi-compat-chip" style={{ borderColor: s ? s.color + '66' : undefined }}>
-              <span className="zi-compat-sym" style={{ color: s ? s.color : undefined }}>{s ? s.symbol : ''}</span>
+            <div key={sign} className="zi-compat-chip">
+              <span className="zi-compat-sym">
+                <ZodiacSymbol sign={sign} size={16} />
+              </span>
               <span className="zi-compat-name">{sign}</span>
             </div>
           );

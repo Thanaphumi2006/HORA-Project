@@ -73,9 +73,16 @@
 }
 
 .your-sign-card .sign-symbol {
-  font-size: 40px;
-  line-height: 1;
-  color: #1a6568;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #111, #282828);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(255,255,255,0.08) inset;
 }
 
 .your-sign-card .sign-label {
@@ -225,9 +232,20 @@
 }
 
 .result-symbol {
-  font-size: 38px;
-  line-height: 1;
-  color: #1a6568;
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #111, #282828);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.32), 0 0 0 1px rgba(255,255,255,0.08) inset;
+  animation: res-sym-glow 3.5s ease-in-out infinite;
+}
+@keyframes res-sym-glow {
+  0%, 100% { box-shadow: 0 5px 20px rgba(0,0,0,0.32), 0 0 0 1px rgba(255,255,255,0.08) inset; }
+  50%       { box-shadow: 0 6px 28px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.16) inset; }
 }
 
 .result-sign {
