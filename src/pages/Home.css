@@ -1,9 +1,90 @@
 .home-page {
   min-height: 100vh;
-  background: linear-gradient(180deg, #c9f0ef 0%, #a8e4e3 40%, #b8eceb 100%);
+  background: linear-gradient(160deg, #c5f2f2 0%, #a8e4e3 35%, #b0e8e7 65%, #c0eeee 100%);
   overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
+  position: relative;
+}
+
+/* ── Aurora glow ─────────────────────────────────────────── */
+.home-page .home-aurora {
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 320px;
+  background: radial-gradient(ellipse at 50% 0%,
+    rgba(140, 220, 230, 0.55) 0%,
+    rgba(160, 230, 240, 0.25) 45%,
+    transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Star field ───────────────────────────────────────────── */
+.home-page .home-stars {
+  position: absolute;
+  top: 0; left: 0;
+  width: 2px; height: 2px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.85);
+  pointer-events: none;
+  z-index: 0;
+  box-shadow:
+    55px  90px 0 0.5px rgba(255,255,255,0.75),
+    160px 55px  0 1px   rgba(255,255,255,0.60),
+    310px 80px  0 0.5px rgba(255,255,255,0.80),
+    370px 140px 0 1px   rgba(255,255,255,0.55),
+    90px  210px 0 0.5px rgba(200,240,242,0.70),
+    240px 170px 0 1.5px rgba(255,255,255,0.65),
+    330px 260px 0 0.5px rgba(200,240,242,0.60),
+    60px  320px 0 1px   rgba(255,255,255,0.50),
+    200px 350px 0 0.5px rgba(200,240,242,0.65),
+    350px 390px 0 1px   rgba(255,255,255,0.55),
+    130px 440px 0 0.5px rgba(200,240,242,0.60),
+    290px 490px 0 1px   rgba(255,255,255,0.45),
+    75px  520px 0 0.5px rgba(200,240,242,0.55),
+    380px 560px 0 1.5px rgba(255,255,255,0.65);
+  animation: star-twinkle 5s ease-in-out infinite alternate;
+}
+
+@keyframes star-twinkle {
+  0%   { opacity: 0.45; }
+  50%  { opacity: 1; }
+  100% { opacity: 0.55; }
+}
+
+/* ── Floating sparkles ───────────────────────────────────── */
+.home-page .home-sparkles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.home-page .hsp {
+  position: absolute;
+  color: rgba(90, 171, 174, 0.75);
+  font-style: normal;
+  animation: hsp-float 7s ease-in-out infinite;
+  user-select: none;
+}
+
+.home-page .hsp-1 { font-size: 11px; top: 12%;  left: 9%;   animation-delay: 0s;    animation-duration: 6s; }
+.home-page .hsp-2 { font-size: 7px;  top: 22%;  right: 8%;  animation-delay: 1.2s;  animation-duration: 8s; opacity: 0.6; }
+.home-page .hsp-3 { font-size: 14px; top: 55%;  left: 6%;   animation-delay: 2.5s;  animation-duration: 7s; }
+.home-page .hsp-4 { font-size: 9px;  top: 45%;  right: 6%;  animation-delay: 0.6s;  animation-duration: 9s; opacity: 0.5; }
+.home-page .hsp-5 { font-size: 8px;  top: 72%;  left: 11%;  animation-delay: 3.5s;  animation-duration: 6s; opacity: 0.65; }
+.home-page .hsp-6 { font-size: 12px; top: 80%;  right: 9%;  animation-delay: 1.8s;  animation-duration: 8s; }
+
+@keyframes hsp-float {
+  0%, 100% { transform: translateY(0px) rotate(0deg);   opacity: 0.4; }
+  33%       { transform: translateY(-10px) rotate(15deg); opacity: 0.9; }
+  66%       { transform: translateY(-6px) rotate(-8deg);  opacity: 0.7; }
 }
 
 .home-page .header {
@@ -53,21 +134,101 @@
   color: #1a6568;
   letter-spacing: 1px;
   text-transform: uppercase;
+  text-shadow: 0 0 32px rgba(90, 171, 174, 0.35);
+}
+
+.home-page .greeting span {
+  background: linear-gradient(135deg, #1a6568, #3da8ac);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .home-page .subtitle {
   margin-top: 5px;
   font-size: 12px;
-  color: rgba(29, 110, 113, 0.91);
-  letter-spacing: 0.5px;
+  color: rgba(29, 110, 113, 0.80);
+  letter-spacing: 1px;
 }
 
 .home-page .zodiac-badge {
-  margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
   font-size: 10px;
-  letter-spacing: 2px;
-  color: rgba(29, 110, 113, 0.84);
+  font-family: inherit;
+  letter-spacing: 2.5px;
+  color: rgba(29, 110, 113, 0.9);
   text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.38);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(100, 185, 188, 0.35);
+  border-radius: 20px;
+  padding: 5px 10px 5px 14px;
+  width: fit-content;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.home-page .zodiac-badge:hover {
+  background: rgba(255,255,255,0.55);
+  box-shadow: 0 4px 16px rgba(100,185,188,0.18);
+}
+.home-page .zi-arrow {
+  width: 12px; height: 12px;
+  stroke: rgba(29,110,113,0.55); fill: none;
+  stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+}
+
+/* Moon phase row */
+.home-page .home-moon-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.home-page .home-moon-emoji {
+  font-size: 18px;
+  line-height: 1;
+}
+.home-page .home-moon-name {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: rgba(29,110,113,0.88);
+  text-transform: uppercase;
+}
+.home-page .home-moon-pct {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: rgba(29,110,113,0.6);
+  text-transform: uppercase;
+}
+
+/* Loading skeleton */
+.home-page .content-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 2px 0;
+}
+.home-page .skel-line {
+  height: 9px;
+  border-radius: 5px;
+  background: linear-gradient(90deg,
+    rgba(100,185,188,0.15) 25%,
+    rgba(100,185,188,0.35) 50%,
+    rgba(100,185,188,0.15) 75%);
+  background-size: 200% 100%;
+  animation: skel-shimmer 1.4s ease-in-out infinite;
+}
+.home-page .skel-w90 { width: 90%; }
+.home-page .skel-w75 { width: 75%; }
+.home-page .skel-w85 { width: 85%; }
+.home-page .skel-w60 { width: 60%; }
+@keyframes skel-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 .home-page .focus-pills {
@@ -114,9 +275,13 @@
   width: 240px;
   height: 240px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.38);
-  backdrop-filter: blur(16px);
-  box-shadow: 0 6px 32px rgba(100, 180, 185, 0.15);
+  background: rgba(255, 255, 255, 0.42);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(160, 220, 225, 0.45);
+  box-shadow:
+    0 6px 32px rgba(100, 180, 185, 0.18),
+    0 0 0 1px rgba(255,255,255,0.25) inset,
+    0 0 24px rgba(100, 200, 210, 0.12) inset;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -298,43 +463,31 @@
 /* ── Star orbit decorations ──────────────────────────────── */
 
 .home-page .home-orbit {
-  position: fixed;
-  width: 320px;
-  height: 320px;
+  position: absolute;
+  width: 420px;
+  height: 420px;
   pointer-events: none;
   z-index: 0;
 }
 
 .home-page .home-orbit-left {
-  left: -160px;
+  left: -180px;
   top: 50%;
-  transform: translateY(-50%);
-  opacity: 0.22;
+  transform: translateY(-55%);
+  opacity: 0.6;
 }
 
 .home-page .home-orbit-right {
-  right: -160px;
+  right: -180px;
   top: 50%;
-  transform: translateY(-50%);
-  opacity: 0.18;
-}
-
-.home-page .ho-sun {
-  position: absolute;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 38% 35%, #b8eceb, #5aabae);
-  box-shadow: 0 0 16px 6px rgba(90, 171, 174, 0.4);
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateY(-45%);
+  opacity: 0.55;
 }
 
 .home-page .ho-ring {
   position: absolute;
   border-radius: 50%;
-  border: 1px solid rgba(90, 171, 174, 0.35);
+  border: 1.5px solid rgba(90, 171, 174, 0.65);
 }
 
 .home-page .ho-ring::before {
@@ -342,31 +495,31 @@
   position: absolute;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, #fff, #7bbcbf);
-  box-shadow: 0 0 8px 3px rgba(255,255,255,0.8), 0 0 14px 5px rgba(123,188,191,0.5);
-  top: -4px;
+  box-shadow: 0 0 8px 3px rgba(255,255,255,0.9), 0 0 16px 6px rgba(123,188,191,0.6);
+  top: -5px;
   left: 50%;
   transform: translateX(-50%);
 }
 
 .home-page .ho-ring-1 {
-  inset: 40px;
+  inset: 60px;
   animation: ho-spin 5s linear infinite;
 }
-.home-page .ho-ring-1::before { width: 9px; height: 9px; }
+.home-page .ho-ring-1::before { width: 11px; height: 11px; }
 
 .home-page .ho-ring-2 {
-  inset: 14px;
-  border-color: rgba(90, 171, 174, 0.22);
+  inset: 24px;
+  border-color: rgba(90, 171, 174, 0.45);
   animation: ho-spin 8s linear infinite reverse;
 }
-.home-page .ho-ring-2::before { width: 7px; height: 7px; }
+.home-page .ho-ring-2::before { width: 9px; height: 9px; }
 
 .home-page .ho-ring-3 {
   inset: 0;
-  border-color: rgba(90, 171, 174, 0.14);
-  animation: ho-spin 12s linear infinite;
+  border-color: rgba(90, 171, 174, 0.28);
+  animation: ho-spin 13s linear infinite;
 }
-.home-page .ho-ring-3::before { width: 5px; height: 5px; }
+.home-page .ho-ring-3::before { width: 7px; height: 7px; }
 
 @keyframes ho-spin {
   from { transform: rotate(0deg); }

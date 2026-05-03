@@ -3,6 +3,54 @@
   background: linear-gradient(180deg, #d6f5f4 0%, #b8eceb 50%, #c4f0ef 100%);
   overflow: hidden;
   padding: 52px 28px 28px;
+  position: relative;
+}
+
+/* Onboarding sparkles */
+.focus-page .ob-stars {
+  position: absolute;
+  top: 0; left: 0;
+  width: 2px; height: 2px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.85);
+  pointer-events: none;
+  box-shadow:
+    80px  60px 0 1px   rgba(255,255,255,0.65),
+    220px 35px 0 0.5px rgba(255,255,255,0.75),
+    340px 70px 0 1px   rgba(200,240,242,0.6),
+    50px  200px 0 0.5px rgba(255,255,255,0.7),
+    280px 180px 0 1px  rgba(200,240,242,0.55),
+    160px 320px 0 0.5px rgba(255,255,255,0.65),
+    360px 300px 0 1px  rgba(200,240,242,0.5);
+  animation: ob-twinkle 5s ease-in-out infinite alternate;
+}
+@keyframes ob-twinkle {
+  0%   { opacity: 0.4; }
+  100% { opacity: 0.9; }
+}
+
+.focus-page .ob-sp {
+  position: absolute;
+  color: rgba(74,168,192,0.65);
+  pointer-events: none;
+  animation: ob-float 7s ease-in-out infinite;
+  user-select: none;
+  z-index: 0;
+}
+.focus-page .ob-sp-1 { font-size: 10px; top: 8%;  left: 5%;   animation-delay: 0s; }
+.focus-page .ob-sp-2 { font-size: 14px; top: 16%; right: 6%;  animation-delay: 1.8s; opacity: 0.55; }
+.focus-page .ob-sp-3 { font-size: 8px;  top: 70%; left: 8%;   animation-delay: 3.2s; opacity: 0.5; }
+.focus-page .ob-sp-4 { font-size: 12px; top: 82%; right: 7%;  animation-delay: 0.5s; }
+
+@keyframes ob-float {
+  0%, 100% { transform: translateY(0) rotate(0deg);    opacity: 0.3; }
+  45%       { transform: translateY(-10px) rotate(15deg); opacity: 0.8; }
+  75%       { transform: translateY(-5px) rotate(-8deg);  opacity: 0.55; }
+}
+
+.focus-page h1, .focus-page .grid, .focus-page .btn-continue {
+  position: relative;
+  z-index: 1;
 }
 
 .focus-page h1 {

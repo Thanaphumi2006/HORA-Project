@@ -26,6 +26,13 @@ export default function Name() {
 
   return (
     <div className="page name-page">
+      <div className="ob-stars" aria-hidden="true" />
+      <span className="ob-sp ob-sp-1" aria-hidden="true">✦</span>
+      <span className="ob-sp ob-sp-2" aria-hidden="true">✦</span>
+      <span className="ob-sp ob-sp-3" aria-hidden="true">✦</span>
+      <span className="ob-sp ob-sp-4" aria-hidden="true">✦</span>
+      <span className="ob-sp ob-sp-5" aria-hidden="true">✦</span>
+      <span className="ob-sp ob-sp-6" aria-hidden="true">✦</span>
       <a className="btn-back" href="/" onClick={handleBack}>
         <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6" /></svg>
         Back

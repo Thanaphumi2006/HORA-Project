@@ -1,11 +1,34 @@
-import { useEffect, useMemo } from 'react';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useFadeNavigate } from '../lib/useFadeNavigate.js';
 import { getZodiac, monthNames } from '../lib/zodiac.js';
 import { deckMap, typeColors, zodiacTarotMap } from '../lib/tarot.js';
 import { getCurrentUser, saveRecord } from '../lib/auth.js';
 import './TarotResult.css';
+
+function ShareButton({ text, title }) {
+  const [copied, setCopied] = useState(false);
+  async function handleShare() {
+    if (navigator.share) {
+      try { await navigator.share({ title, text }); } catch (_) {}
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (_) {}
+  }
+  return (
+    <button className="btn-share" onClick={handleShare}>
+      {copied ? (
+        <><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg>Copied!</>
+      ) : (
+        <><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" /></svg>Share</>
+      )}
+    </button>
+  );
+}
 
 function MiniCardImage({ src, alt, fallback, gradient }) {
   const [failed, setFailed] = useState(false);
@@ -41,6 +64,11 @@ export default function TarotResult() {
     new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }), []);
   const isoDate = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
+  const shareText = [
+    rulingCard ? `${zodiac}'s Ruling Card: ${rulingCard.name}\n${rulingCard.up}` : '',
+    ...cards.map((c, i) => `Card ${i + 1}: ${c.name}\n${c.up}`),
+  ].filter(Boolean).join('\n\n');
+
   // Save tarot reading to history
   useEffect(() => {
     const user = getCurrentUser();
@@ -73,7 +101,7 @@ export default function TarotResult() {
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6" /></svg>
         </a>
         <span className="page-title">Card Prediction</span>
-        <div className="menu-icon"><span></span><span></span><span></span></div>
+        <ShareButton text={shareText} title={`${zodiac} Tarot Reading`} />
       </div>
 
       {rulingCard && (

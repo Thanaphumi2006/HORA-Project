@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useFadeNavigate } from '../lib/useFadeNavigate.js';
-import { getCurrentUser, getHistory, authSignOut, updateDisplayName, deleteAccount } from '../lib/auth.js';
+import { getCurrentUser, getHistory, authSignOut, updateDisplayName, deleteAccount, getUserProfile, saveUserProfile } from '../lib/auth.js';
+import { monthNames } from '../lib/zodiac.js';
 import './Profile.css';
 
 const FOCUS_EMOJI = { love: '💖', work: '💼', health: '🌿', social: '🌟' };
+const FOCUS_OPTIONS = ['love', 'work', 'health', 'social'];
 
 function DailyRecord({ rec }) {
   const [open, setOpen] = useState(false);
@@ -76,15 +78,34 @@ function TarotRecord({ rec }) {
 export default function Profile() {
   const fadeNavigate = useFadeNavigate();
   const [params] = useSearchParams();
-  const bdayQ = `name=${encodeURIComponent(params.get('name') || '')}&day=${params.get('day') || ''}&month=${encodeURIComponent(params.get('month') || '')}&year=${params.get('year') || ''}`;
 
   const user = getCurrentUser();
   const history = user ? getHistory(user.email) : [];
+  const storedProfile = user ? (getUserProfile(user.email) || {}) : {};
+
+  const initDay = parseInt(params.get('day') || storedProfile.day) || 1;
+  const initMonth = params.get('month') || storedProfile.month || 'January';
+  const initYear = parseInt(params.get('year') || storedProfile.year) || new Date().getFullYear();
+  const initFocus = storedProfile.focus || 'love';
+
+  const [bdayDay, setBdayDay] = useState(initDay);
+  const [bdayMonth, setBdayMonth] = useState(initMonth);
+  const [bdayYear, setBdayYear] = useState(initYear);
+  const [currentFocus, setCurrentFocus] = useState(initFocus);
+
+  const bdayQ = `name=${encodeURIComponent(params.get('name') || '')}&day=${bdayDay}&month=${encodeURIComponent(bdayMonth)}&year=${bdayYear}`;
 
   const [renaming, setRenaming] = useState(false);
   const [newName, setNewName] = useState(user?.displayName || '');
   const [renameSaved, setRenameSaved] = useState(false);
+  const [editingBday, setEditingBday] = useState(false);
+  const [bdaySaved, setBdaySaved] = useState(false);
+  const [editingFocus, setEditingFocus] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: currentYear - 1899 }, (_, i) => currentYear - i);
+  const days = Array.from({ length: 31 }, (_, i) => i + 1);
 
   function handleRename() {
     const trimmed = newName.trim();
@@ -93,6 +114,20 @@ export default function Profile() {
     setRenaming(false);
     setRenameSaved(true);
     setTimeout(() => setRenameSaved(false), 2000);
+  }
+
+  function handleSaveBday() {
+    if (!user) return;
+    saveUserProfile(user.email, { day: bdayDay, month: bdayMonth, year: bdayYear });
+    setEditingBday(false);
+    setBdaySaved(true);
+    setTimeout(() => setBdaySaved(false), 2000);
+  }
+
+  function handleSaveFocus(f) {
+    setCurrentFocus(f);
+    if (user) saveUserProfile(user.email, { focus: f });
+    setEditingFocus(false);
   }
 
   const dailyCount = history.filter(r => r.type === 'daily').length;
@@ -106,7 +141,7 @@ export default function Profile() {
 
   function handleBack(e) {
     e.preventDefault();
-    fadeNavigate(`/home?${bdayQ}`);
+    fadeNavigate(`/home?${bdayQ}&focus=${currentFocus}`);
   }
 
   function handleSignOut(e) {
@@ -170,6 +205,68 @@ export default function Profile() {
           {renameSaved && <div className="prof-rename-ok">Name updated ✓</div>}
           <div className="prof-email">{user.email}</div>
         </div>
+      </div>
+
+      {/* Birthday editing */}
+      <div className="prof-edit-section">
+        <div className="prof-edit-row">
+          <div className="prof-edit-label-group">
+            <span className="prof-edit-icon">🎂</span>
+            <div>
+              <div className="prof-edit-key">Birthday</div>
+              <div className="prof-edit-val">{bdayDay} {bdayMonth} {bdayYear}</div>
+            </div>
+          </div>
+          <button className="prof-edit-btn" onClick={() => setEditingBday(v => !v)}>
+            {editingBday ? 'Cancel' : 'Edit'}
+          </button>
+        </div>
+        {editingBday && (
+          <div className="prof-bday-form">
+            <div className="prof-bday-selects">
+              <select className="prof-select" value={bdayDay} onChange={e => setBdayDay(Number(e.target.value))}>
+                {days.map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
+              <select className="prof-select" value={bdayMonth} onChange={e => setBdayMonth(e.target.value)}>
+                {monthNames.map(m => <option key={m} value={m}>{m}</option>)}
+              </select>
+              <select className="prof-select" value={bdayYear} onChange={e => setBdayYear(Number(e.target.value))}>
+                {years.map(y => <option key={y} value={y}>{y}</option>)}
+              </select>
+            </div>
+            <button className="prof-save-btn" onClick={handleSaveBday}>Save Birthday</button>
+          </div>
+        )}
+        {bdaySaved && <div className="prof-rename-ok">Birthday updated ✓</div>}
+      </div>
+
+      {/* Focus editing */}
+      <div className="prof-edit-section">
+        <div className="prof-edit-row">
+          <div className="prof-edit-label-group">
+            <span className="prof-edit-icon">{FOCUS_EMOJI[currentFocus] || '✦'}</span>
+            <div>
+              <div className="prof-edit-key">Focus Area</div>
+              <div className="prof-edit-val" style={{ textTransform: 'capitalize' }}>{currentFocus}</div>
+            </div>
+          </div>
+          <button className="prof-edit-btn" onClick={() => setEditingFocus(v => !v)}>
+            {editingFocus ? 'Cancel' : 'Edit'}
+          </button>
+        </div>
+        {editingFocus && (
+          <div className="prof-focus-options">
+            {FOCUS_OPTIONS.map(f => (
+              <button
+                key={f}
+                className={`prof-focus-chip${currentFocus === f ? ' active' : ''}`}
+                onClick={() => handleSaveFocus(f)}
+              >
+                {FOCUS_EMOJI[f]} {f}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="prof-stats">

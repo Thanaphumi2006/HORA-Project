@@ -32,6 +32,11 @@ export default function Focus() {
 
   return (
     <div className="page focus-page">
+      <div className="ob-stars" aria-hidden="true" />
+      <span className="ob-sp ob-sp-1" aria-hidden="true">✦</span>
+      <span className="ob-sp ob-sp-2" aria-hidden="true">✦</span>
+      <span className="ob-sp ob-sp-3" aria-hidden="true">✦</span>
+      <span className="ob-sp ob-sp-4" aria-hidden="true">✦</span>
       <h1>Focus area</h1>
 
       <div className="grid">

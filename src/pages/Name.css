@@ -5,6 +5,65 @@
   justify-content: center;
   background: linear-gradient(180deg, #c9f0ef 0%, #a8e4e3 40%, #b8eceb 100%);
   overflow: hidden;
+  position: relative;
+}
+
+/* Onboarding decorations */
+.name-page::before {
+  content: '';
+  position: absolute;
+  top: -60px; left: 50%;
+  transform: translateX(-50%);
+  width: 500px; height: 260px;
+  background: radial-gradient(ellipse at 50% 0%,
+    rgba(140,220,230,0.45) 0%,
+    rgba(160,230,240,0.18) 50%,
+    transparent 70%);
+  pointer-events: none;
+}
+
+.name-page .ob-stars {
+  position: absolute;
+  top: 0; left: 0;
+  width: 2px; height: 2px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.85);
+  pointer-events: none;
+  box-shadow:
+    70px  50px 0 0.5px rgba(255,255,255,0.7),
+    180px 80px  0 1px   rgba(255,255,255,0.6),
+    300px 40px  0 0.5px rgba(255,255,255,0.8),
+    50px  180px 0 1px   rgba(200,240,242,0.6),
+    250px 160px 0 0.5px rgba(255,255,255,0.7),
+    350px 200px 0 1px   rgba(200,240,242,0.55),
+    120px 300px 0 0.5px rgba(255,255,255,0.65),
+    320px 350px 0 1px   rgba(200,240,242,0.5);
+  animation: ob-twinkle 4s ease-in-out infinite alternate;
+}
+
+@keyframes ob-twinkle {
+  0%   { opacity: 0.4; }
+  100% { opacity: 0.9; }
+}
+
+.name-page .ob-sp {
+  position: absolute;
+  color: rgba(90,171,174,0.7);
+  pointer-events: none;
+  animation: ob-float 6s ease-in-out infinite;
+  user-select: none;
+}
+.name-page .ob-sp-1 { font-size: 10px; top: 10%; left: 7%;   animation-delay: 0s; }
+.name-page .ob-sp-2 { font-size: 14px; top: 18%; right: 8%;  animation-delay: 1.5s; opacity: 0.6; }
+.name-page .ob-sp-3 { font-size: 8px;  top: 72%; left: 10%;  animation-delay: 2.8s; }
+.name-page .ob-sp-4 { font-size: 12px; top: 80%; right: 9%;  animation-delay: 0.8s; opacity: 0.55; }
+.name-page .ob-sp-5 { font-size: 7px;  top: 40%; left: 5%;   animation-delay: 3.5s; opacity: 0.5; }
+.name-page .ob-sp-6 { font-size: 11px; top: 55%; right: 6%;  animation-delay: 1.2s; }
+
+@keyframes ob-float {
+  0%, 100% { transform: translateY(0) rotate(0deg);    opacity: 0.35; }
+  40%       { transform: translateY(-12px) rotate(18deg); opacity: 0.85; }
+  70%       { transform: translateY(-6px) rotate(-10deg); opacity: 0.6; }
 }
 
 .name-page .container {

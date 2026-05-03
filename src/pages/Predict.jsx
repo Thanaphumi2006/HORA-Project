@@ -1,14 +1,49 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useFadeNavigate } from '../lib/useFadeNavigate.js';
 import { getZodiac, lifePathNumber, monthNames } from '../lib/zodiac.js';
-import { focusLabels, lpnColors, zodiacFocusPredictions } from '../lib/horoscope.js';
+import { focusLabels, lpnColors, zodiacFocusPredictions, zodiacWeeklyForecast } from '../lib/horoscope.js';
 import { getCurrentUser, saveRecord } from '../lib/auth.js';
 import './Predict.css';
+
+function ShareButton({ text, title }) {
+  const [copied, setCopied] = useState(false);
+
+  async function handleShare() {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, text });
+      } catch (_) { /* user cancelled */ }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (_) { /* clipboard denied */ }
+  }
+
+  return (
+    <button className="btn-share" onClick={handleShare}>
+      {copied ? (
+        <>
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg>
+          Copied!
+        </>
+      ) : (
+        <>
+          <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" /></svg>
+          Share
+        </>
+      )}
+    </button>
+  );
+}
 
 export default function Predict() {
   const fadeNavigate = useFadeNavigate();
   const [params] = useSearchParams();
+  const [tab, setTab] = useState('today');
 
   const name = params.get('name') || '';
   const day = parseInt(params.get('day')) || new Date().getDate();
@@ -29,8 +64,12 @@ export default function Predict() {
   const points = focusPoints[zodiac] || focusPoints.Pisces;
   const recs = lpnColors[lpn] || lpnColors[9];
   const focusLabel = focusLabels[focus] || focus;
+  const weeklyText = zodiacWeeklyForecast[zodiac] || zodiacWeeklyForecast.Pisces;
 
-  // Save to history once per day per focus
+  const shareText = tab === 'today'
+    ? `My ${focusLabel} horoscope for ${zodiac}:\n\n${points.join('\n\n')}`
+    : `My weekly forecast for ${zodiac}:\n\n${weeklyText}`;
+
   useEffect(() => {
     const user = getCurrentUser();
     if (!user) return;
@@ -60,7 +99,7 @@ export default function Predict() {
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6" /></svg>
         </a>
         <span className="page-title">{focusLabel} Prediction</span>
-        <div className="menu-icon"><span></span><span></span><span></span></div>
+        <ShareButton text={shareText} title={`${zodiac} ${focusLabel} Horoscope`} />
       </div>
 
       <div className="zodiac-row">
@@ -69,9 +108,26 @@ export default function Predict() {
         <span className="today-date">{todayDate}</span>
       </div>
 
-      <div className="prediction-box">
-        {points.map((p, i) => <p key={i} className="prediction-point">{p}</p>)}
+      <div className="predict-tabs">
+        <button
+          className={`predict-tab${tab === 'today' ? ' active' : ''}`}
+          onClick={() => setTab('today')}
+        >Today</button>
+        <button
+          className={`predict-tab${tab === 'week' ? ' active' : ''}`}
+          onClick={() => setTab('week')}
+        >This Week</button>
       </div>
+
+      {tab === 'today' ? (
+        <div className="prediction-box">
+          {points.map((p, i) => <p key={i} className="prediction-point">{p}</p>)}
+        </div>
+      ) : (
+        <div className="prediction-box weekly-box">
+          <p className="weekly-text">{weeklyText}</p>
+        </div>
+      )}
 
       <div className="section-heading">Recommendation</div>
       <p className="lpn-label">Life Path {lpn} · Lucky Colors</p>

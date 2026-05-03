@@ -5,12 +5,14 @@ import { getZodiac, monthNames } from '../lib/zodiac.js';
 import { zodiacHoroscope } from '../lib/horoscope.js';
 import { zodiacTarotData } from '../lib/tarot.js';
 import { authSignOut, getCurrentUser, saveUserProfile } from '../lib/auth.js';
+import { getMoonPhase } from '../lib/moonphase.js';
 import './Home.css';
 
 export default function Home() {
   const fadeNavigate = useFadeNavigate();
   const [params, setParams] = useSearchParams();
   const [expanded, setExpanded] = useState(null);
+  const [horoscopeLoaded, setHoroscopeLoaded] = useState(false);
 
   const name = params.get('name') || 'there';
   const day = parseInt(params.get('day')) || new Date().getDate();
@@ -21,18 +23,21 @@ export default function Home() {
   const monthNum = monthNames.indexOf(monthStr) + 1;
   const zodiac = useMemo(() => getZodiac(day, monthNum), [day, monthNum]);
   const ruling = zodiacTarotData[zodiac] || zodiacTarotData.Pisces;
+  const moon = useMemo(() => getMoonPhase(), []);
 
   const [horoscope, setHoroscope] = useState(zodiacHoroscope[zodiac] || zodiacHoroscope.Pisces);
   const [tarotMeanings, setTarotMeanings] = useState({ up: ruling.up, rev: ruling.rev, name: ruling.name, value: ruling.value });
 
   useEffect(() => {
     let cancelled = false;
+    setHoroscopeLoaded(false);
     fetch(`https://freehoroscopeapi.com/api/v1/get-horoscope/daily?sign=${zodiac}&day=today`)
       .then(r => r.json())
       .then(d => {
         if (!cancelled && d?.data?.horoscope) {
           setHoroscope(d.data.horoscope.replace(/^Here is your horoscope[^:]*:\s*/i, '').trim());
         }
+        if (!cancelled) setHoroscopeLoaded(true);
       })
       .catch(() =>
         fetch(`https://horoscope-app-api.vercel.app/api/v1/get-horoscope/daily?sign=${zodiac}&day=today`)
@@ -41,8 +46,9 @@ export default function Home() {
             if (!cancelled && d?.data?.horoscope) {
               setHoroscope(d.data.horoscope.replace(/^Here is your horoscope[^:]*:\s*/i, '').trim());
             }
+            if (!cancelled) setHoroscopeLoaded(true);
           })
-          .catch(() => { /* keep local */ })
+          .catch(() => { if (!cancelled) setHoroscopeLoaded(true); })
       );
     return () => { cancelled = true; };
   }, [zodiac]);
@@ -100,16 +106,30 @@ export default function Home() {
     fadeNavigate(`/compatibility?${bdayQ}`);
   }
 
+  function openZodiacInfo(e) {
+    e.stopPropagation();
+    fadeNavigate(`/zodiac?zodiac=${zodiac}&${bdayQ}`);
+  }
+
   return (
     <div className="page home-page">
+      <div className="home-aurora"    aria-hidden="true" />
+      <div className="home-stars"     aria-hidden="true" />
+      <div className="home-sparkles"  aria-hidden="true">
+        <span className="hsp hsp-1">✦</span>
+        <span className="hsp hsp-2">✦</span>
+        <span className="hsp hsp-3">✦</span>
+        <span className="hsp hsp-4">✦</span>
+        <span className="hsp hsp-5">✦</span>
+        <span className="hsp hsp-6">✦</span>
+      </div>
+
       <div className="home-orbit home-orbit-left" aria-hidden="true">
-        <div className="ho-sun"></div>
         <div className="ho-ring ho-ring-1"></div>
         <div className="ho-ring ho-ring-2"></div>
         <div className="ho-ring ho-ring-3"></div>
       </div>
       <div className="home-orbit home-orbit-right" aria-hidden="true">
-        <div className="ho-sun"></div>
         <div className="ho-ring ho-ring-1"></div>
         <div className="ho-ring ho-ring-2"></div>
         <div className="ho-ring ho-ring-3"></div>
@@ -128,7 +148,15 @@ export default function Home() {
         </div>
         <div className="greeting">Hi <span>{name}</span></div>
         <div className="subtitle">Here is your today prediction</div>
-        <div className="zodiac-badge">✦ <span>{zodiac}</span></div>
+        <button className="zodiac-badge" onClick={openZodiacInfo} title="View zodiac info">
+          ✦ <span>{zodiac}</span>
+          <svg className="zi-arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>
+        </button>
+        <div className="home-moon-row">
+          <span className="home-moon-emoji">{moon.emoji}</span>
+          <span className="home-moon-name">{moon.name}</span>
+          <span className="home-moon-pct">{moon.pct}% illuminated</span>
+        </div>
         <div className="focus-pills">
           {['love', 'work', 'health', 'social'].map(f => (
             <button
@@ -178,7 +206,16 @@ export default function Home() {
             <div className="content-title">Today Prediction</div>
             <div className="content-tag">{zodiac}</div>
             <div className="content-divider"></div>
-            <div className="content-body">{horoscope}</div>
+            {horoscopeLoaded ? (
+              <div className="content-body">{horoscope}</div>
+            ) : (
+              <div className="content-skeleton">
+                <div className="skel-line skel-w90"></div>
+                <div className="skel-line skel-w75"></div>
+                <div className="skel-line skel-w85"></div>
+                <div className="skel-line skel-w60"></div>
+              </div>
+            )}
             <button className="circle-nav-btn" onClick={(e) => { e.stopPropagation(); openPredict(); }}>
               View Full Prediction →
             </button>

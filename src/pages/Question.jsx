@@ -147,6 +147,11 @@ export default function Question() {
 
   return (
     <div className="page question-page">
+      <div className="ob-stars" aria-hidden="true" />
+      <span className="ob-sp ob-sp-1" aria-hidden="true">✦</span>
+      <span className="ob-sp ob-sp-2" aria-hidden="true">✦</span>
+      <span className="ob-sp ob-sp-3" aria-hidden="true">✦</span>
+      <span className="ob-sp ob-sp-4" aria-hidden="true">✦</span>
       <div className="question-text">
         {fromHome && (
           <button className="btn-skip q-back-home" onClick={handleSkip}>← Back</button>
