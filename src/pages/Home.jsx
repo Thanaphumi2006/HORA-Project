@@ -6,6 +6,7 @@ import { zodiacHoroscope } from '../lib/horoscope.js';
 import { zodiacTarotData } from '../lib/tarot.js';
 import { authSignOut, getCurrentUser, saveUserProfile } from '../lib/auth.js';
 import { getMoonPhase } from '../lib/moonphase.js';
+import { zodiacInfoData } from '../lib/zodiacinfo.js';
 import './Home.css';
 
 export default function Home() {
@@ -149,7 +150,8 @@ export default function Home() {
         <div className="greeting">Hi <span>{name}</span></div>
         <div className="subtitle">Here is your today prediction</div>
         <button className="zodiac-badge" onClick={openZodiacInfo} title="View zodiac info">
-          ✦ <span>{zodiac}</span>
+          <span className="zodiac-badge-sym">{zodiacInfoData[zodiac]?.symbol || '✦'}</span>
+          <span className="zodiac-badge-name">{zodiac}</span>
           <svg className="zi-arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>
         </button>
         <div className="home-moon-row">
