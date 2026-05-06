@@ -117,3 +117,15 @@ export function saveRecord(email, record) {
   list.unshift({ ...record, id: Date.now() });
   localStorage.setItem(historyKey(email), JSON.stringify(list.slice(0, 100)));
 }
+
+export function deleteRecord(email, id) {
+  const list = getHistory(email).filter(r => r.id !== id);
+  localStorage.setItem(historyKey(email), JSON.stringify(list));
+}
+
+export function addNoteToRecord(email, id, note) {
+  const list = getHistory(email).map(r =>
+    r.id === id ? { ...r, note: note.trim() || undefined } : r
+  );
+  localStorage.setItem(historyKey(email), JSON.stringify(list));
+}

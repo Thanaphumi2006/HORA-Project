@@ -108,6 +108,10 @@ export default function Home() {
     fadeNavigate(`/compatibility?${bdayQ}`);
   }
 
+  function openHistory() {
+    fadeNavigate(`/history?${bdayQ}&focus=${focus}`);
+  }
+
   function openZodiacInfo(e) {
     e.stopPropagation();
     fadeNavigate(`/zodiac?zodiac=${zodiac}&${bdayQ}`);
@@ -193,6 +197,17 @@ export default function Home() {
             <div>
               <div className="compat-banner-title">Ask a Question</div>
               <div className="compat-banner-sub">Draw a card for guidance on what's on your mind</div>
+            </div>
+          </div>
+          <svg className="compat-banner-arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>
+        </div>
+
+        <div className="compat-banner" onClick={openHistory}>
+          <div className="compat-banner-left">
+            <span className="compat-banner-icon">📔</span>
+            <div>
+              <div className="compat-banner-title">Reading Journal</div>
+              <div className="compat-banner-sub">Look back on your past readings and add notes</div>
             </div>
           </div>
           <svg className="compat-banner-arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>

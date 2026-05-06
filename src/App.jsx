@@ -11,6 +11,7 @@ import TarotResult from './pages/TarotResult.jsx';
 import Profile from './pages/Profile.jsx';
 import Compatibility from './pages/Compatibility.jsx';
 import ZodiacInfo from './pages/ZodiacInfo.jsx';
+import History from './pages/History.jsx';
 
 export default function App() {
   return (
@@ -27,6 +28,7 @@ export default function App() {
       <Route path="/profile" element={<Profile />} />
       <Route path="/compatibility" element={<Compatibility />} />
       <Route path="/zodiac" element={<ZodiacInfo />} />
+      <Route path="/history" element={<History />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

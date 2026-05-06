@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useFadeNavigate } from '../lib/useFadeNavigate.js';
 import { deck } from '../lib/tarot.js';
+import { getZodiac, monthNames } from '../lib/zodiac.js';
+import { getCurrentUser, saveRecord } from '../lib/auth.js';
 import './Question.css';
 
 const TOPICS = [
@@ -119,9 +121,30 @@ export default function Question() {
     setQuestion(q);
     const drawn = deck[Math.floor(Math.random() * deck.length)];
     const reversed = Math.random() < 0.3;
+    const orient = reversed ? 'reversed' : 'upright';
     setCard(drawn);
-    setOrientation(reversed ? 'reversed' : 'upright');
+    setOrientation(orient);
     requestAnimationFrame(() => setRevealed(true));
+
+    const user = getCurrentUser();
+    if (!user) return;
+    const day = params.get('day') || '';
+    const monthStr = params.get('month') || 'January';
+    const monthNum = monthNames.indexOf(monthStr) + 1;
+    const zodiac = getZodiac(day, monthNum);
+    saveRecord(user.email, {
+      type: 'ask',
+      isoDate: new Date().toISOString().slice(0, 10),
+      date: new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+      zodiac,
+      topicId: topic?.id,
+      topicLabel: topic?.label,
+      topicIcon: topic?.icon,
+      question: q,
+      orientation: orient,
+      card: { id: drawn.id, name: drawn.name, type: drawn.type, keywords: drawn.keywords, up: drawn.up, rev: drawn.rev },
+      prediction: buildPrediction(topic, drawn, orient),
+    });
   }
 
   function handleBackToTopics() {
