@@ -142,17 +142,19 @@ export default function Home() {
       </div>
 
       <div className="header">
-        <div className="header-actions">
-          <a className="btn-profile" href="#/" onClick={handleProfile}>
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" /><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" /></svg>
-            Profile
-          </a>
-          <a className="btn-signout" href="#/" onClick={handleSignOut}>
-            <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
-            Sign Out
-          </a>
+        <div className="header-top">
+          <div className="greeting">Hi <span>{name}</span></div>
+          <div className="header-actions">
+            <a className="btn-profile" href="#/" onClick={handleProfile}>
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" /><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" /></svg>
+              Profile
+            </a>
+            <a className="btn-signout" href="#/" onClick={handleSignOut}>
+              <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
+              Sign Out
+            </a>
+          </div>
         </div>
-        <div className="greeting">Hi <span>{name}</span></div>
         <div className="subtitle">Here is your today prediction</div>
         <button className="zodiac-badge" onClick={openZodiacInfo} title="View zodiac info">
           <span className="zodiac-badge-sym">
@@ -180,40 +182,43 @@ export default function Home() {
       </div>
 
       <div className="circles-wrap">
-        <div className="compat-banner" onClick={openCompatibility}>
-          <div className="compat-banner-left">
-            <span className="compat-banner-icon">◈</span>
-            <div>
-              <div className="compat-banner-title">Compatibility Check</div>
-              <div className="compat-banner-sub">See how your stars align with a friend</div>
+        <div className="banners-section">
+          <div className="compat-banner" onClick={openCompatibility}>
+            <div className="compat-banner-left">
+              <span className="compat-banner-icon">◈</span>
+              <div>
+                <div className="compat-banner-title">Compatibility Check</div>
+                <div className="compat-banner-sub">See how your stars align with a friend</div>
+              </div>
             </div>
+            <svg className="compat-banner-arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>
           </div>
-          <svg className="compat-banner-arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>
+
+          <div className="compat-banner" onClick={() => fadeNavigate(`/question?${bdayQ}&focus=${focus}`)}>
+            <div className="compat-banner-left">
+              <span className="compat-banner-icon">🔮</span>
+              <div>
+                <div className="compat-banner-title">Ask a Question</div>
+                <div className="compat-banner-sub">Draw a card for guidance on what's on your mind</div>
+              </div>
+            </div>
+            <svg className="compat-banner-arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>
+          </div>
+
+          <div className="compat-banner" onClick={openHistory}>
+            <div className="compat-banner-left">
+              <span className="compat-banner-icon">📔</span>
+              <div>
+                <div className="compat-banner-title">Reading Journal</div>
+                <div className="compat-banner-sub">Look back on your past readings and add notes</div>
+              </div>
+            </div>
+            <svg className="compat-banner-arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>
+          </div>
         </div>
 
-        <div className="compat-banner" onClick={() => fadeNavigate(`/question?${bdayQ}&focus=${focus}`)}>
-          <div className="compat-banner-left">
-            <span className="compat-banner-icon">🔮</span>
-            <div>
-              <div className="compat-banner-title">Ask a Question</div>
-              <div className="compat-banner-sub">Draw a card for guidance on what's on your mind</div>
-            </div>
-          </div>
-          <svg className="compat-banner-arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>
-        </div>
-
-        <div className="compat-banner" onClick={openHistory}>
-          <div className="compat-banner-left">
-            <span className="compat-banner-icon">📔</span>
-            <div>
-              <div className="compat-banner-title">Reading Journal</div>
-              <div className="compat-banner-sub">Look back on your past readings and add notes</div>
-            </div>
-          </div>
-          <svg className="compat-banner-arrow" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6" /></svg>
-        </div>
-
-        <div
+        <div className="circles-section">
+          <div
           className={`circle-card${expanded === 'predict' ? ' expanded' : ''}`}
           onClick={() => setExpanded(prev => prev === 'predict' ? null : 'predict')}
         >
@@ -269,6 +274,7 @@ export default function Home() {
               Pick Your Cards →
             </button>
           </div>
+        </div>
         </div>
       </div>
     </div>

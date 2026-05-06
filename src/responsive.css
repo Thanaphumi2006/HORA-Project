@@ -1,0 +1,607 @@
+/* ═══════════════════════════════════════════════════════════════════
+   HORA — Responsive Styles
+   Mobile-first design with tablet and desktop breakpoints
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Safe area for notched devices ─────────────────────────────────── */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+/* ── Base responsive container ─────────────────────────────────────── */
+.page {
+  padding-left: var(--safe-left);
+  padding-right: var(--safe-right);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   TABLET (min-width: 600px)
+   ══════════════════════════════════════════════════════════════════ */
+@media (min-width: 600px) {
+  /* ── Login ──────────────────────────────────────────────────────── */
+  .login-page .card {
+    max-width: 440px;
+    padding: 56px 48px;
+  }
+  .login-page .splash-hora {
+    font-size: 110px;
+    letter-spacing: 18px;
+  }
+
+  /* ── Home ───────────────────────────────────────────────────────── */
+  .home-page .header {
+    padding: 56px 48px 12px;
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .home-page .greeting {
+    font-size: 28px;
+  }
+  .home-page .circles-wrap {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 32px 48px;
+    gap: 32px;
+  }
+  .home-page .banners-section {
+    max-width: 320px;
+    flex-shrink: 0;
+  }
+  .home-page .circles-section {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 24px;
+  }
+  .home-page .circle-card {
+    width: 260px;
+    height: 260px;
+  }
+  .home-page .circle-card.expanded {
+    width: 340px;
+    height: 340px;
+  }
+
+  /* ── Predict ────────────────────────────────────────────────────── */
+  .predict-page .predict-header,
+  .predict-page .zodiac-row,
+  .predict-page .predict-tabs,
+  .predict-page .prediction-box,
+  .predict-page .section-heading,
+  .predict-page .lpn-label,
+  .predict-page .recommendations {
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .predict-page .prediction-box {
+    padding: 32px 28px;
+  }
+  .predict-page .prediction-point {
+    font-size: 14px;
+  }
+
+  /* ── Tarot ──────────────────────────────────────────────────────── */
+  .tarot-page .card-grid {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 600px;
+    gap: 20px;
+  }
+  .tarot-page .tarot-header,
+  .tarot-page .title-wrap {
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .tarot-page .btn-reading {
+    max-width: 400px;
+  }
+
+  /* ── Tarot Result ───────────────────────────────────────────────── */
+  .tarot-result-page .tr-header,
+  .tarot-result-page .first-card-banner,
+  .tarot-result-page .section-label,
+  .tarot-result-page .result-list,
+  .tarot-result-page .btn-home {
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .tarot-result-page .result-row {
+    gap: 20px;
+  }
+  .tarot-result-page .mini-card {
+    width: 130px;
+  }
+  .tarot-result-page .meaning-text {
+    font-size: 13px;
+  }
+
+  /* ── Profile ────────────────────────────────────────────────────── */
+  .profile-page .prof-header,
+  .profile-page .prof-identity,
+  .profile-page .prof-edit-section,
+  .profile-page .prof-stats,
+  .profile-page .prof-section-title,
+  .profile-page .prof-no-history,
+  .profile-page .prof-history,
+  .profile-page .prof-danger-zone {
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .profile-page .prof-stats {
+    gap: 16px;
+  }
+  .profile-page .prof-stat {
+    padding: 20px 14px;
+  }
+  .profile-page .prof-stat-value {
+    font-size: 28px;
+  }
+
+  /* ── History ────────────────────────────────────────────────────── */
+  .history-page .hist-header,
+  .history-page .hist-sub,
+  .history-page .hist-filters,
+  .history-page .hist-no-records,
+  .history-page .hist-list {
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* ── Compatibility ──────────────────────────────────────────────── */
+  .compatibility-page .compat-header,
+  .compatibility-page .compat-intro,
+  .compatibility-page .compat-form-wrap,
+  .compatibility-page .compat-result-card {
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* ── Zodiac Info ────────────────────────────────────────────────── */
+  .zodiac-info-page .zi-header,
+  .zodiac-info-page .zi-hero,
+  .zodiac-info-page .zi-desc-card,
+  .zodiac-info-page .zi-section-label,
+  .zodiac-info-page .zi-traits-row,
+  .zodiac-info-page .zi-compat-row,
+  .zodiac-info-page .zi-lucky-row {
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* ── Question ───────────────────────────────────────────────────── */
+  .question-page .question-text {
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .question-page .q-topic-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* ── Birthday / Name / Focus ────────────────────────────────────── */
+  .birthday-page .birthday-card,
+  .name-page .name-card,
+  .focus-page .focus-card {
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   DESKTOP (min-width: 1024px)
+   ══════════════════════════════════════════════════════════════════ */
+@media (min-width: 1024px) {
+  /* ── Login ──────────────────────────────────────────────────────── */
+  .login-page .card {
+    max-width: 480px;
+    padding: 64px 56px;
+  }
+  .login-page .splash-hora {
+    font-size: 130px;
+    letter-spacing: 22px;
+  }
+
+  /* ── Home ───────────────────────────────────────────────────────── */
+  .home-page .header {
+    padding: 64px 64px 16px;
+    max-width: 1100px;
+  }
+  .home-page .greeting {
+    font-size: 34px;
+  }
+  .home-page .subtitle {
+    font-size: 14px;
+  }
+  .home-page .header-actions {
+    gap: 16px;
+  }
+  .home-page .circles-wrap {
+    gap: 40px;
+    max-width: 1100px;
+    padding: 32px 48px 64px;
+  }
+  .home-page .banners-section {
+    max-width: 360px;
+  }
+  .home-page .compat-banner {
+    padding: 18px 22px;
+  }
+  .home-page .compat-banner-title {
+    font-size: 12px;
+  }
+  .home-page .compat-banner-sub {
+    font-size: 11px;
+  }
+  .home-page .circles-section {
+    gap: 32px;
+  }
+  .home-page .circle-card {
+    width: 280px;
+    height: 280px;
+  }
+  .home-page .circle-card.expanded {
+    width: 380px;
+    height: 380px;
+  }
+  .home-page .circle-content {
+    padding: 32px 28px;
+  }
+  .home-page .content-body {
+    font-size: 12px;
+  }
+  .home-page .home-aurora {
+    width: 800px;
+    height: 400px;
+  }
+
+  /* ── Predict ────────────────────────────────────────────────────── */
+  .predict-page .predict-header,
+  .predict-page .zodiac-row,
+  .predict-page .predict-tabs,
+  .predict-page .prediction-box,
+  .predict-page .section-heading,
+  .predict-page .lpn-label,
+  .predict-page .recommendations {
+    max-width: 800px;
+  }
+  .predict-page .page-title {
+    font-size: 22px;
+  }
+  .predict-page .prediction-box {
+    padding: 36px 32px;
+  }
+  .predict-page .recommendations {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .predict-page .rec-card {
+    flex: 1 1 calc(50% - 10px);
+    min-width: 280px;
+  }
+
+  /* ── Tarot ──────────────────────────────────────────────────────── */
+  .tarot-page .card-grid {
+    grid-template-columns: repeat(4, 1fr);
+    max-width: 800px;
+    gap: 24px;
+  }
+  .tarot-page .tarot-header,
+  .tarot-page .title-wrap {
+    max-width: 800px;
+  }
+  .tarot-page .page-title {
+    font-size: 26px;
+  }
+
+  /* ── Tarot Result ───────────────────────────────────────────────── */
+  .tarot-result-page .tr-header,
+  .tarot-result-page .first-card-banner,
+  .tarot-result-page .section-label,
+  .tarot-result-page .result-list,
+  .tarot-result-page .btn-home {
+    max-width: 900px;
+  }
+  .tarot-result-page .result-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .tarot-result-page .result-row {
+    flex: 1 1 calc(50% - 10px);
+    min-width: 320px;
+  }
+
+  /* ── Profile ────────────────────────────────────────────────────── */
+  .profile-page .prof-header,
+  .profile-page .prof-identity,
+  .profile-page .prof-edit-section,
+  .profile-page .prof-stats,
+  .profile-page .prof-section-title,
+  .profile-page .prof-no-history,
+  .profile-page .prof-history,
+  .profile-page .prof-danger-zone {
+    max-width: 700px;
+  }
+
+  /* ── History ────────────────────────────────────────────────────── */
+  .history-page .hist-header,
+  .history-page .hist-sub,
+  .history-page .hist-filters,
+  .history-page .hist-no-records,
+  .history-page .hist-list {
+    max-width: 900px;
+  }
+  .history-page .hist-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .history-page .hist-record {
+    break-inside: avoid;
+  }
+
+  /* ── Question ───────────────────────────────────────────────────── */
+  .question-page .question-text {
+    max-width: 700px;
+  }
+  .question-page .q-topic-grid {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+  }
+  .question-page .q-card-wrap {
+    width: 200px;
+    height: 300px;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   LARGE DESKTOP (min-width: 1400px)
+   ══════════════════════════════════════════════════════════════════ */
+@media (min-width: 1400px) {
+  .home-page .header {
+    max-width: 1300px;
+  }
+  .home-page .circles-wrap {
+    max-width: 1300px;
+  }
+  .home-page .circle-card {
+    width: 300px;
+    height: 300px;
+  }
+  .home-page .circle-card.expanded {
+    width: 420px;
+    height: 420px;
+  }
+
+  .tarot-page .card-grid {
+    grid-template-columns: repeat(5, 1fr);
+    max-width: 1000px;
+  }
+
+  .history-page .hist-list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   TOUCH IMPROVEMENTS (hover: none)
+   ══════════════════════════════════════════════════════════════════ */
+@media (hover: none) {
+  .home-page .compat-banner:hover,
+  .home-page .circle-card:hover,
+  .home-page .zodiac-badge:hover {
+    background: inherit;
+    box-shadow: inherit;
+  }
+
+  button, a, .tarot-page .card-wrap {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   LANDSCAPE MOBILE (max-height: 500px) and (orientation: landscape)
+   ══════════════════════════════════════════════════════════════════ */
+@media (max-height: 500px) and (orientation: landscape) {
+  .home-page .header {
+    padding-top: 24px;
+  }
+  .home-page .greeting {
+    font-size: 20px;
+  }
+  .home-page .header-top {
+    margin-bottom: 8px;
+  }
+  .home-page .circles-wrap {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 16px;
+    padding: 12px 24px 24px;
+  }
+  .home-page .circle-card {
+    width: 180px;
+    height: 180px;
+    flex-shrink: 0;
+  }
+  .home-page .circle-card.expanded {
+    width: 240px;
+    height: 240px;
+  }
+  .home-page .compat-banner {
+    flex-shrink: 0;
+    max-width: 260px;
+    padding: 12px 16px;
+  }
+
+  .login-page .splash-hora {
+    font-size: 60px;
+    letter-spacing: 10px;
+  }
+  .login-page .splash-hint {
+    margin-top: 24px;
+  }
+  .login-page .card {
+    padding: 32px 28px;
+  }
+
+  .predict-page .predict-header {
+    padding-top: 24px;
+  }
+  .tarot-page .tarot-header {
+    padding-top: 24px;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   SMALL MOBILE (max-width: 360px)
+   ══════════════════════════════════════════════════════════════════ */
+@media (max-width: 360px) {
+  .home-page .header {
+    padding: 44px 16px 8px;
+  }
+  .home-page .header-actions {
+    gap: 6px;
+  }
+  .home-page .btn-signout,
+  .home-page .btn-profile {
+    font-size: 9px;
+    gap: 3px;
+  }
+  .home-page .btn-signout svg,
+  .home-page .btn-profile svg {
+    width: 12px;
+    height: 12px;
+  }
+  .home-page .greeting {
+    font-size: 18px;
+  }
+  .home-page .header-top {
+    margin-bottom: 10px;
+  }
+  .home-page .circles-wrap {
+    padding: 12px 16px 28px;
+    gap: 20px;
+  }
+  .home-page .circle-card {
+    width: 200px;
+    height: 200px;
+  }
+  .home-page .circle-card.expanded {
+    width: 280px;
+    height: 280px;
+  }
+  .home-page .compat-banner {
+    max-width: 280px;
+    padding: 14px 16px;
+  }
+  .home-page .compat-banner-title {
+    font-size: 10px;
+  }
+  .home-page .compat-banner-sub {
+    font-size: 9px;
+  }
+
+  .predict-page .predict-header,
+  .predict-page .zodiac-row,
+  .predict-page .predict-tabs,
+  .predict-page .prediction-box,
+  .predict-page .recommendations {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .tarot-page .card-grid {
+    padding: 0 20px;
+    gap: 12px;
+  }
+
+  .login-page .splash-hora {
+    font-size: 60px;
+    letter-spacing: 10px;
+  }
+  .login-page .card {
+    padding: 36px 24px;
+  }
+
+  .profile-page .prof-header,
+  .profile-page .prof-identity,
+  .profile-page .prof-edit-section,
+  .profile-page .prof-stats,
+  .profile-page .prof-section-title,
+  .profile-page .prof-no-history,
+  .profile-page .prof-history,
+  .profile-page .prof-danger-zone {
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+
+  .history-page .hist-header,
+  .history-page .hist-sub,
+  .history-page .hist-filters,
+  .history-page .hist-no-records,
+  .history-page .hist-list {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   PRINT STYLES
+   ══════════════════════════════════════════════════════════════════ */
+@media print {
+  .home-page .home-aurora,
+  .home-page .home-stars,
+  .home-page .home-sparkles,
+  .home-page .home-orbit,
+  .btn-back,
+  .btn-signout,
+  .btn-profile,
+  .btn-share {
+    display: none !important;
+  }
+
+  .page {
+    animation: none !important;
+    background: #fff !important;
+  }
+
+  .prediction-box,
+  .rec-card,
+  .result-row {
+    break-inside: avoid;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   REDUCED MOTION
+   ══════════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .page {
+    animation: none !important;
+  }
+}

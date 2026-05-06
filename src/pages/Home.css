@@ -88,18 +88,23 @@
 }
 
 .home-page .header {
-  padding: 52px 32px 8px;
+  padding: 52px 24px 8px;
   flex-shrink: 0;
   position: relative;
 }
 
-.home-page .header-actions {
-  position: absolute;
-  top: 52px;
-  right: 32px;
+.home-page .header-top {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.home-page .header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 .home-page .btn-signout,
@@ -129,12 +134,17 @@
 }
 
 .home-page .greeting {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
   color: #1a6568;
   letter-spacing: 1px;
   text-transform: uppercase;
   text-shadow: 0 0 32px rgba(90, 171, 174, 0.35);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .home-page .greeting span {
@@ -294,9 +304,25 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 28px;
-  padding: 16px 24px 32px;
+  justify-content: flex-start;
+  gap: 20px;
+  padding: 16px 20px 32px;
+}
+
+.home-page .banners-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 340px;
+}
+
+.home-page .circles-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
 }
 
 .home-page .circle-card {
@@ -492,24 +518,40 @@
 
 .home-page .home-orbit {
   position: absolute;
-  width: 420px;
-  height: 420px;
+  width: 300px;
+  height: 300px;
   pointer-events: none;
   z-index: 0;
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .home-page .home-orbit {
+    display: block;
+    width: 350px;
+    height: 350px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .home-page .home-orbit {
+    width: 420px;
+    height: 420px;
+  }
 }
 
 .home-page .home-orbit-left {
-  left: -180px;
+  left: -150px;
   top: 50%;
   transform: translateY(-55%);
-  opacity: 0.6;
+  opacity: 0.5;
 }
 
 .home-page .home-orbit-right {
-  right: -180px;
+  right: -150px;
   top: 50%;
   transform: translateY(-45%);
-  opacity: 0.55;
+  opacity: 0.45;
 }
 
 .home-page .ho-ring {
@@ -558,11 +600,10 @@
 
 .home-page .compat-banner {
   width: 100%;
-  max-width: 320px;
   background: rgba(255, 255, 255, 0.38);
   backdrop-filter: blur(16px);
-  border-radius: 20px;
-  padding: 16px 20px;
+  border-radius: 16px;
+  padding: 14px 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
