@@ -6,7 +6,9 @@
 import React, {useRef, useState} from 'react';
 import {
   Animated,
+  Modal,
   Pressable,
+  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
@@ -14,7 +16,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import Svg, {Circle, Path} from 'react-native-svg';
+import Svg, {Circle, Defs, Ellipse, Path, RadialGradient, Rect, Stop} from 'react-native-svg';
 
 const COLORS = {
   screenBg: '#F1ECE2',
@@ -28,6 +30,10 @@ const COLORS = {
   waveLavenderPale: 'rgba(222, 221, 244, 0.42)',
   wavePink: '#F7DEE6',
   wavePinkPale: 'rgba(247, 222, 230, 0.42)',
+  marbleBase: '#F6ECEC',
+  marbleBlush: '#F0D5DC',
+  marbleMauve: '#E7D8E6',
+  avatarTan: '#B49B73',
 };
 
 // "The Seasons" (the original Canva font) is Canva-licensed only;
@@ -82,6 +88,34 @@ const ArrowIcon = ({size, color}: IconProps) => (
       fill="none"
     />
   </Svg>
+);
+
+/** Soft pink-marble backdrop for the profile screen. */
+const MarbleBackground = ({width, height}: {width: number; height: number}) => (
+  <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+    <Svg width={width} height={height}>
+      <Defs>
+        <RadialGradient id="blush" cx="50%" cy="50%" r="50%">
+          <Stop offset="0%" stopColor={COLORS.marbleBlush} stopOpacity="0.9" />
+          <Stop offset="100%" stopColor={COLORS.marbleBlush} stopOpacity="0" />
+        </RadialGradient>
+        <RadialGradient id="mauve" cx="50%" cy="50%" r="50%">
+          <Stop offset="0%" stopColor={COLORS.marbleMauve} stopOpacity="0.85" />
+          <Stop offset="100%" stopColor={COLORS.marbleMauve} stopOpacity="0" />
+        </RadialGradient>
+        <RadialGradient id="glow" cx="50%" cy="50%" r="50%">
+          <Stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.9" />
+          <Stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
+        </RadialGradient>
+      </Defs>
+      <Rect x="0" y="0" width={width} height={height} fill={COLORS.marbleBase} />
+      <Ellipse cx={width * 0.15} cy={height * 0.08} rx={width * 0.7} ry={height * 0.28} fill="url(#blush)" />
+      <Ellipse cx={width * 0.9} cy={height * 0.22} rx={width * 0.6} ry={height * 0.24} fill="url(#mauve)" />
+      <Ellipse cx={width * 0.5} cy={height * 0.5} rx={width * 0.75} ry={height * 0.3} fill="url(#glow)" />
+      <Ellipse cx={width * 0.1} cy={height * 0.78} rx={width * 0.6} ry={height * 0.26} fill="url(#blush)" />
+      <Ellipse cx={width * 0.95} cy={height * 0.95} rx={width * 0.65} ry={height * 0.25} fill="url(#mauve)" />
+    </Svg>
+  </View>
 );
 
 /** Pale pink wave flowing in from the top edge. */
@@ -157,12 +191,12 @@ const Field = ({icon, placeholder, secure, email, scale, last}: FieldProps) => {
 type ScreenProps = {
   variant: 'login' | 'register';
   onSwitch: () => void;
-  onAction: (msg: string) => void;
+  onEnter: () => void;
   scale: number;
   screenH: number;
 };
 
-const AuthScreen = ({variant, onSwitch, onAction, scale, screenH}: ScreenProps) => {
+const AuthScreen = ({variant, onSwitch, onEnter, scale, screenH}: ScreenProps) => {
   const s = (n: number) => n * scale;
   const isLogin = variant === 'login';
 
@@ -221,7 +255,7 @@ const AuthScreen = ({variant, onSwitch, onAction, scale, screenH}: ScreenProps) 
 
       {/* lavender arrow button */}
       <Pressable
-        onPress={() => onAction(isLogin ? 'Signed in' : 'Account created')}
+        onPress={onEnter}
         style={({pressed}) => [
           styles.go,
           {
@@ -238,7 +272,7 @@ const AuthScreen = ({variant, onSwitch, onAction, scale, screenH}: ScreenProps) 
 
       {/* try now pill */}
       <Pressable
-        onPress={() => onAction('Guest session started')}
+        onPress={onEnter}
         style={({pressed}) => [
           styles.tryPill,
           {
@@ -260,20 +294,235 @@ const AuthScreen = ({variant, onSwitch, onAction, scale, screenH}: ScreenProps) 
   );
 };
 
+type ProfileProps = {
+  onLogout: () => void;
+  onAction: (msg: string) => void;
+  scale: number;
+};
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const DAYS = Array.from({length: 31}, (_, i) => String(i + 1));
+const YEARS = Array.from({length: 100}, (_, i) => String(new Date().getFullYear() - i));
+
+const ProfileScreen = ({onLogout, onAction, scale}: ProfileProps) => {
+  const s = (n: number) => n * scale;
+  const [name, setName] = useState('');
+  const [month, setMonth] = useState('');
+  const [day, setDay] = useState('');
+  const [year, setYear] = useState('');
+  const [openPicker, setOpenPicker] = useState<'Month' | 'Day' | 'Year' | null>(null);
+  const avatarSize = s(150);
+
+  const pickerOptions =
+    openPicker === 'Month' ? MONTHS : openPicker === 'Day' ? DAYS : YEARS;
+  const setPicked =
+    openPicker === 'Month' ? setMonth : openPicker === 'Day' ? setDay : setYear;
+
+  return (
+    <View style={StyleSheet.absoluteFill}>
+      <Pressable onPress={onLogout} hitSlop={12} style={{position: 'absolute', top: s(50), right: s(30)}}>
+        <Text style={{fontFamily: SERIF, fontSize: s(16), color: COLORS.gold}}>Back</Text>
+      </Pressable>
+
+      {/* avatar with add-photo badge */}
+      <Pressable
+        onPress={() => onAction('Photo picker coming soon')}
+        style={{position: 'absolute', top: s(108), alignSelf: 'center', width: avatarSize, height: avatarSize}}>
+        <Svg width={avatarSize} height={avatarSize} viewBox="0 0 150 150">
+          <Circle cx="75" cy="75" r="72" stroke={COLORS.avatarTan} strokeWidth="4" fill="none" />
+          <Circle cx="75" cy="58" r="26" fill={COLORS.avatarTan} />
+          <Path d="M27 122 C36 90 55 80 75 80 C95 80 114 90 123 122 A72 72 0 0 1 27 122 Z" fill={COLORS.avatarTan} />
+          <Path d="M137 122 v22 M126 133 h22" stroke={COLORS.avatarTan} strokeWidth="7" strokeLinecap="round" />
+        </Svg>
+      </Pressable>
+
+      <Text
+        style={{
+          position: 'absolute',
+          top: s(292),
+          left: s(30),
+          right: s(30),
+          textAlign: 'center',
+          fontFamily: SERIF,
+          fontSize: s(30),
+          color: COLORS.avatarTan,
+        }}
+        numberOfLines={1}
+        adjustsFontSizeToFit>
+        {name.trim() ? `Hello, ${name.trim()}` : 'Hello, ...'}
+      </Text>
+
+      {/* name pill */}
+      <View
+        style={[
+          styles.namePill,
+          {
+            top: s(376),
+            left: s(34),
+            right: s(34),
+            borderRadius: s(22),
+            paddingVertical: s(14),
+            paddingHorizontal: s(24),
+          },
+        ]}>
+        <TextInput
+          value={name}
+          onChangeText={setName}
+          placeholder="Enter your name"
+          placeholderTextColor={COLORS.gold}
+          autoCapitalize="words"
+          style={{
+            fontFamily: SERIF,
+            fontSize: s(16),
+            color: COLORS.ink,
+            textAlign: 'center',
+            paddingVertical: 0,
+          }}
+        />
+        <View style={[styles.rule, {height: s(1.5), width: '70%', alignSelf: 'center', marginTop: s(6)}]} />
+      </View>
+
+      {/* date of birth card */}
+      <View
+        style={[
+          styles.dobCard,
+          {
+            top: s(486),
+            left: s(26),
+            right: s(26),
+            borderRadius: s(28),
+            paddingVertical: s(28),
+            paddingHorizontal: s(22),
+          },
+        ]}>
+        <Text
+          style={{
+            fontFamily: SERIF,
+            fontSize: s(26),
+            lineHeight: s(34),
+            color: COLORS.avatarTan,
+            textAlign: 'center',
+          }}>
+          Enter your{'\n'}Date of birth
+        </Text>
+
+        <View style={{flexDirection: 'row', gap: s(12), marginTop: s(24)}}>
+          {[
+            {ph: 'Month' as const, val: month},
+            {ph: 'Day' as const, val: day},
+            {ph: 'Year' as const, val: year},
+          ].map(f => (
+            <Pressable
+              key={f.ph}
+              onPress={() => setOpenPicker(f.ph)}
+              style={({pressed}) => [
+                styles.dobBox,
+                {
+                  borderRadius: s(12),
+                  borderWidth: s(1.6),
+                  paddingVertical: s(12),
+                  backgroundColor: pressed ? 'rgba(169,162,212,0.18)' : 'rgba(255,255,255,0.55)',
+                },
+              ]}>
+              <Text
+                style={{
+                  fontFamily: SERIF,
+                  fontSize: s(15),
+                  color: f.val ? COLORS.ink : COLORS.gold,
+                  textAlign: 'center',
+                }}>
+                {f.val || f.ph}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+
+        <Pressable
+          onPress={() =>
+            onAction(name.trim() ? `Welcome, ${name.trim()}` : 'Please enter your name')
+          }
+          style={({pressed}) => [
+            styles.continueBtn,
+            {
+              marginTop: s(20),
+              borderRadius: s(10),
+              paddingVertical: s(13),
+              opacity: pressed ? 0.85 : 1,
+            },
+          ]}>
+          <Text style={{fontFamily: SERIF, fontSize: s(16), color: '#FFFFFF', textAlign: 'center'}}>
+            Continue
+          </Text>
+        </Pressable>
+      </View>
+
+      {/* dropdown picker */}
+      <Modal
+        visible={openPicker !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setOpenPicker(null)}>
+        <Pressable style={styles.pickerOverlay} onPress={() => setOpenPicker(null)}>
+          <View
+            style={[
+              styles.pickerSheet,
+              {borderRadius: s(24), paddingVertical: s(18), width: s(220), maxHeight: s(400)},
+            ]}>
+            <Text
+              style={{
+                fontFamily: SERIF,
+                fontSize: s(20),
+                color: COLORS.avatarTan,
+                textAlign: 'center',
+                marginBottom: s(10),
+              }}>
+              {openPicker}
+            </Text>
+            <ScrollView>
+              {pickerOptions.map(opt => (
+                <Pressable
+                  key={opt}
+                  onPress={() => {
+                    setPicked(opt);
+                    setOpenPicker(null);
+                  }}
+                  style={({pressed}) => ({
+                    paddingVertical: s(11),
+                    backgroundColor: pressed ? 'rgba(169,162,212,0.25)' : 'transparent',
+                  })}>
+                  <Text
+                    style={{
+                      fontFamily: SERIF,
+                      fontSize: s(17),
+                      color: COLORS.ink,
+                      textAlign: 'center',
+                    }}>
+                    {opt}
+                  </Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+        </Pressable>
+      </Modal>
+    </View>
+  );
+};
+
 export default function App() {
   const {width, height} = useWindowDimensions();
   const scale = width / 375;
 
-  const [screen, setScreen] = useState<'login' | 'register'>('login');
+  const [screen, setScreen] = useState<'login' | 'register' | 'profile'>('login');
   const fade = useRef(new Animated.Value(1)).current;
 
   const [toast, setToast] = useState('');
   const toastFade = useRef(new Animated.Value(0)).current;
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const switchScreen = () => {
+  const goTo = (target: 'login' | 'register' | 'profile') => {
     Animated.timing(fade, {toValue: 0, duration: 200, useNativeDriver: true}).start(() => {
-      setScreen(prev => (prev === 'login' ? 'register' : 'login'));
+      setScreen(target);
       Animated.timing(fade, {toValue: 1, duration: 260, useNativeDriver: true}).start();
     });
   };
@@ -290,19 +539,30 @@ export default function App() {
   };
 
   return (
-    <View style={{flex: 1, backgroundColor: COLORS.screenBg}}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.wavePink} />
-      <TopWaves width={width} height={190 * scale} />
-      <BottomWaves width={width} height={260 * scale} />
-
+    <View style={{flex: 1, backgroundColor: screen === 'profile' ? COLORS.marbleBase : COLORS.screenBg}}>
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor={screen === 'profile' ? COLORS.marbleBase : COLORS.wavePink}
+      />
       <Animated.View style={[StyleSheet.absoluteFill, {opacity: fade}]}>
-        <AuthScreen
-          variant={screen}
-          onSwitch={switchScreen}
-          onAction={showToast}
-          scale={scale}
-          screenH={height}
-        />
+        {screen === 'profile' ? (
+          <>
+            <MarbleBackground width={width} height={height} />
+            <ProfileScreen onLogout={() => goTo('login')} onAction={showToast} scale={scale} />
+          </>
+        ) : (
+          <>
+            <TopWaves width={width} height={190 * scale} />
+            <BottomWaves width={width} height={260 * scale} />
+            <AuthScreen
+              variant={screen}
+              onSwitch={() => goTo(screen === 'login' ? 'register' : 'login')}
+              onEnter={() => goTo('profile')}
+              scale={scale}
+              screenH={height}
+            />
+          </>
+        )}
       </Animated.View>
 
       <Animated.View
@@ -374,5 +634,40 @@ const styles = StyleSheet.create({
     position: 'absolute',
     alignSelf: 'center',
     backgroundColor: COLORS.ink,
+  },
+  namePill: {
+    position: 'absolute',
+    backgroundColor: COLORS.card,
+    shadowColor: '#85755C',
+    shadowOffset: {width: 14, height: 18},
+    shadowOpacity: 0.28,
+    shadowRadius: 24,
+    elevation: 12,
+  },
+  dobCard: {
+    position: 'absolute',
+    backgroundColor: COLORS.card,
+    shadowColor: '#85755C',
+    shadowOffset: {width: 14, height: 18},
+    shadowOpacity: 0.28,
+    shadowRadius: 24,
+    elevation: 12,
+  },
+  dobBox: {
+    flex: 1,
+    borderColor: COLORS.lavender,
+    justifyContent: 'center',
+  },
+  continueBtn: {
+    backgroundColor: COLORS.lavender,
+  },
+  pickerOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(26,21,15,0.35)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pickerSheet: {
+    backgroundColor: COLORS.card,
   },
 });
