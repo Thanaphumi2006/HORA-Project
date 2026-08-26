@@ -3,9 +3,11 @@
  * Cream ground, didone serif, gold accents, neumorphic card, lavender actions.
  */
 
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
+  ActivityIndicator,
   Animated,
+  Image,
   Modal,
   Pressable,
   ScrollView,
@@ -17,6 +19,15 @@ import {
   View,
 } from 'react-native';
 import Svg, {Circle, Defs, Ellipse, Path, RadialGradient, Rect, Stop} from 'react-native-svg';
+import {
+  GoogleSignin,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
+import {
+  GOOGLE_WEB_CLIENT_ID,
+  REQUEST_ID_TOKEN,
+  isGoogleConfigured,
+} from './googleAuthConfig';
 
 const COLORS = {
   screenBg: '#F1ECE2',
@@ -86,6 +97,28 @@ const ArrowIcon = ({size, color}: IconProps) => (
       strokeLinecap="round"
       strokeLinejoin="round"
       fill="none"
+    />
+  </Svg>
+);
+
+/** Google's four-colour "G" mark. */
+const GoogleIcon = ({size}: {size: number}) => (
+  <Svg width={size} height={size} viewBox="0 0 48 48">
+    <Path
+      fill="#4285F4"
+      d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"
+    />
+    <Path
+      fill="#34A853"
+      d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"
+    />
+    <Path
+      fill="#FBBC05"
+      d="M11.69 28.18C11.25 26.86 11 25.45 11 24s.25-2.86.69-4.18v-5.7H4.34C2.85 17.09 2 20.45 2 24s.85 6.91 2.34 9.88l7.35-5.7z"
+    />
+    <Path
+      fill="#EA4335"
+      d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"
     />
   </Svg>
 );
@@ -188,15 +221,65 @@ const Field = ({icon, placeholder, secure, email, scale, last}: FieldProps) => {
   );
 };
 
+type GoogleButtonProps = {
+  onPress: () => void;
+  busy: boolean;
+  scale: number;
+  top: number;
+};
+
+/** "Continue with Google", styled to sit inside the cream/gold palette. */
+const GoogleButton = ({onPress, busy, scale, top}: GoogleButtonProps) => {
+  const s = (n: number) => n * scale;
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={busy}
+      style={({pressed}) => [
+        styles.googleBtn,
+        {
+          top,
+          left: s(40),
+          right: s(40),
+          borderRadius: s(30),
+          paddingVertical: s(15),
+          gap: s(12),
+          borderWidth: s(1.4),
+          opacity: busy ? 0.6 : pressed ? 0.88 : 1,
+          transform: [{scale: pressed ? 0.98 : 1}],
+        },
+      ]}>
+      {busy ? (
+        <ActivityIndicator size="small" color={COLORS.gold} />
+      ) : (
+        <GoogleIcon size={s(22)} />
+      )}
+      <Text style={{fontFamily: SERIF, fontSize: s(17), color: COLORS.ink}}>
+        {busy ? 'Signing in…' : 'Continue with Google'}
+      </Text>
+    </Pressable>
+  );
+};
+
 type ScreenProps = {
   variant: 'login' | 'register';
   onSwitch: () => void;
   onEnter: () => void;
+  onGoogle: () => void;
+  googleBusy: boolean;
   scale: number;
   screenH: number;
 };
 
-const AuthScreen = ({variant, onSwitch, onEnter, scale, screenH}: ScreenProps) => {
+const AuthScreen = ({
+  variant,
+  onSwitch,
+  onEnter,
+  onGoogle,
+  googleBusy,
+  scale,
+  screenH,
+}: ScreenProps) => {
   const s = (n: number) => n * scale;
   const isLogin = variant === 'login';
 
@@ -270,6 +353,14 @@ const AuthScreen = ({variant, onSwitch, onEnter, scale, screenH}: ScreenProps) =
         <ArrowIcon size={s(42)} color="#FFFFFF" />
       </Pressable>
 
+      {/* google sign-in, in the gap between the card and the try-now pill */}
+      <GoogleButton
+        onPress={onGoogle}
+        busy={googleBusy}
+        scale={scale}
+        top={screenH * 0.615}
+      />
+
       {/* try now pill */}
       <Pressable
         onPress={onEnter}
@@ -294,19 +385,26 @@ const AuthScreen = ({variant, onSwitch, onEnter, scale, screenH}: ScreenProps) =
   );
 };
 
+type GoogleProfile = {
+  name: string | null;
+  email: string;
+  photo: string | null;
+};
+
 type ProfileProps = {
   onLogout: () => void;
   onAction: (msg: string) => void;
   scale: number;
+  googleUser: GoogleProfile | null;
 };
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const DAYS = Array.from({length: 31}, (_, i) => String(i + 1));
 const YEARS = Array.from({length: 100}, (_, i) => String(new Date().getFullYear() - i));
 
-const ProfileScreen = ({onLogout, onAction, scale}: ProfileProps) => {
+const ProfileScreen = ({onLogout, onAction, scale, googleUser}: ProfileProps) => {
   const s = (n: number) => n * scale;
-  const [name, setName] = useState('');
+  const [name, setName] = useState(googleUser?.name ?? '');
   const [month, setMonth] = useState('');
   const [day, setDay] = useState('');
   const [year, setYear] = useState('');
@@ -321,19 +419,38 @@ const ProfileScreen = ({onLogout, onAction, scale}: ProfileProps) => {
   return (
     <View style={StyleSheet.absoluteFill}>
       <Pressable onPress={onLogout} hitSlop={12} style={{position: 'absolute', top: s(50), right: s(30)}}>
-        <Text style={{fontFamily: SERIF, fontSize: s(16), color: COLORS.gold}}>Back</Text>
+        <Text style={{fontFamily: SERIF, fontSize: s(16), color: COLORS.gold}}>
+          {googleUser ? 'Sign out' : 'Back'}
+        </Text>
       </Pressable>
 
-      {/* avatar with add-photo badge */}
+      {/* avatar — the Google photo when signed in, else the drawn placeholder */}
       <Pressable
-        onPress={() => onAction('Photo picker coming soon')}
+        onPress={() =>
+          onAction(
+            googleUser ? `Signed in as ${googleUser.email}` : 'Photo picker coming soon',
+          )
+        }
         style={{position: 'absolute', top: s(108), alignSelf: 'center', width: avatarSize, height: avatarSize}}>
-        <Svg width={avatarSize} height={avatarSize} viewBox="0 0 150 150">
-          <Circle cx="75" cy="75" r="72" stroke={COLORS.avatarTan} strokeWidth="4" fill="none" />
-          <Circle cx="75" cy="58" r="26" fill={COLORS.avatarTan} />
-          <Path d="M27 122 C36 90 55 80 75 80 C95 80 114 90 123 122 A72 72 0 0 1 27 122 Z" fill={COLORS.avatarTan} />
-          <Path d="M137 122 v22 M126 133 h22" stroke={COLORS.avatarTan} strokeWidth="7" strokeLinecap="round" />
-        </Svg>
+        {googleUser?.photo ? (
+          <Image
+            source={{uri: googleUser.photo}}
+            style={{
+              width: avatarSize,
+              height: avatarSize,
+              borderRadius: avatarSize / 2,
+              borderWidth: s(4),
+              borderColor: COLORS.avatarTan,
+            }}
+          />
+        ) : (
+          <Svg width={avatarSize} height={avatarSize} viewBox="0 0 150 150">
+            <Circle cx="75" cy="75" r="72" stroke={COLORS.avatarTan} strokeWidth="4" fill="none" />
+            <Circle cx="75" cy="58" r="26" fill={COLORS.avatarTan} />
+            <Path d="M27 122 C36 90 55 80 75 80 C95 80 114 90 123 122 A72 72 0 0 1 27 122 Z" fill={COLORS.avatarTan} />
+            <Path d="M137 122 v22 M126 133 h22" stroke={COLORS.avatarTan} strokeWidth="7" strokeLinecap="round" />
+          </Svg>
+        )}
       </Pressable>
 
       <Text
@@ -351,6 +468,23 @@ const ProfileScreen = ({onLogout, onAction, scale}: ProfileProps) => {
         adjustsFontSizeToFit>
         {name.trim() ? `Hello, ${name.trim()}` : 'Hello, ...'}
       </Text>
+
+      {googleUser && (
+        <Text
+          style={{
+            position: 'absolute',
+            top: s(336),
+            left: s(30),
+            right: s(30),
+            textAlign: 'center',
+            fontFamily: SERIF,
+            fontSize: s(14),
+            color: COLORS.gold,
+          }}
+          numberOfLines={1}>
+          {googleUser.email}
+        </Text>
+      )}
 
       {/* name pill */}
       <View
@@ -520,6 +654,31 @@ export default function App() {
   const toastFade = useRef(new Animated.Value(0)).current;
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const [googleUser, setGoogleUser] = useState<GoogleProfile | null>(null);
+  const [googleBusy, setGoogleBusy] = useState(false);
+
+  useEffect(() => {
+    if (!isGoogleConfigured()) {
+      return;
+    }
+    // webClientId is only sent when an idToken is actually wanted; requesting one
+    // without a matching Android OAuth client is what raises DEVELOPER_ERROR.
+    GoogleSignin.configure(
+      REQUEST_ID_TOKEN
+        ? {webClientId: GOOGLE_WEB_CLIENT_ID, offlineAccess: false}
+        : {offlineAccess: false},
+    );
+    // Restore a previous session without showing the account chooser.
+    GoogleSignin.signInSilently()
+      .then(res => {
+        if (res.type === 'success') {
+          setGoogleUser(res.data.user);
+          setScreen('profile');
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const goTo = (target: 'login' | 'register' | 'profile') => {
     Animated.timing(fade, {toValue: 0, duration: 200, useNativeDriver: true}).start(() => {
       setScreen(target);
@@ -538,6 +697,51 @@ export default function App() {
     }, 1600);
   };
 
+  const handleGoogleSignIn = async () => {
+    if (!isGoogleConfigured()) {
+      showToast('Add your Web client ID to googleAuthConfig.ts');
+      return;
+    }
+    setGoogleBusy(true);
+    try {
+      await GoogleSignin.hasPlayServices({showPlayServicesUpdateDialog: true});
+      const res = await GoogleSignin.signIn();
+      if (res.type === 'success') {
+        setGoogleUser(res.data.user);
+        goTo('profile');
+      } else {
+        showToast('Sign-in cancelled');
+      }
+    } catch (err) {
+      const code = (err as {code?: string})?.code;
+      if (code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        showToast('Google Play Services unavailable');
+      } else if (code === statusCodes.IN_PROGRESS) {
+        showToast('Sign-in already in progress');
+      } else if (code === statusCodes.SIGN_IN_CANCELLED) {
+        showToast('Sign-in cancelled');
+      } else {
+        // DEVELOPER_ERROR lands here: SHA-1 / package name / client ID mismatch.
+        showToast(`Sign-in failed${code ? ` (${code})` : ''}`);
+        console.warn('[GoogleSignIn]', err);
+      }
+    } finally {
+      setGoogleBusy(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    if (googleUser) {
+      try {
+        await GoogleSignin.signOut();
+      } catch (err) {
+        console.warn('[GoogleSignIn] signOut', err);
+      }
+      setGoogleUser(null);
+    }
+    goTo('login');
+  };
+
   return (
     <View style={{flex: 1, backgroundColor: screen === 'profile' ? COLORS.marbleBase : COLORS.screenBg}}>
       <StatusBar
@@ -548,7 +752,13 @@ export default function App() {
         {screen === 'profile' ? (
           <>
             <MarbleBackground width={width} height={height} />
-            <ProfileScreen onLogout={() => goTo('login')} onAction={showToast} scale={scale} />
+            <ProfileScreen
+              key={googleUser?.email ?? 'guest'}
+              onLogout={handleLogout}
+              onAction={showToast}
+              scale={scale}
+              googleUser={googleUser}
+            />
           </>
         ) : (
           <>
@@ -558,6 +768,8 @@ export default function App() {
               variant={screen}
               onSwitch={() => goTo(screen === 'login' ? 'register' : 'login')}
               onEnter={() => goTo('profile')}
+              onGoogle={handleGoogleSignIn}
+              googleBusy={googleBusy}
               scale={scale}
               screenH={height}
             />
@@ -575,9 +787,16 @@ export default function App() {
             paddingHorizontal: 24 * scale,
             paddingVertical: 11 * scale,
             borderRadius: 40 * scale,
+            maxWidth: width - 48 * scale,
           },
         ]}>
-        <Text style={{fontFamily: SERIF, fontSize: 16 * scale, color: COLORS.screenBg}}>
+        <Text
+          style={{
+            fontFamily: SERIF,
+            fontSize: 16 * scale,
+            color: COLORS.screenBg,
+            textAlign: 'center',
+          }}>
           {toast}
         </Text>
       </Animated.View>
@@ -634,6 +853,19 @@ const styles = StyleSheet.create({
     position: 'absolute',
     alignSelf: 'center',
     backgroundColor: COLORS.ink,
+  },
+  googleBtn: {
+    position: 'absolute',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.card,
+    borderColor: COLORS.goldSoft,
+    shadowColor: '#85755C',
+    shadowOffset: {width: 6, height: 8},
+    shadowOpacity: 0.2,
+    shadowRadius: 14,
+    elevation: 8,
   },
   namePill: {
     position: 'absolute',
