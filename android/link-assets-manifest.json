@@ -1,0 +1,21 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "assets/fonts/CormorantGaramond-SemiBold.ttf",
+      "sha1": "9cea163b9e4dc16e55105531648b40adee66e6f7"
+    },
+    {
+      "path": "assets/fonts/Kodchasan-Medium.ttf",
+      "sha1": "f31b86d05457624aa3bc86245c1653d0653e88ff"
+    },
+    {
+      "path": "assets/fonts/Kodchasan-Regular.ttf",
+      "sha1": "89ea1bfe2769e9cf89f799906f683d32d6dad0ca"
+    },
+    {
+      "path": "assets/fonts/Kodchasan-SemiBold.ttf",
+      "sha1": "639e769a00b1045039a382f22f1fd250564573bb"
+    }
+  ]
+}

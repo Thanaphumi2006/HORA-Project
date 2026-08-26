@@ -5,10 +5,11 @@
 
 import React, {useEffect, useRef, useState} from 'react';
 import {
-  ActivityIndicator,
   Animated,
   Image,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   StatusBar,
@@ -19,6 +20,15 @@ import {
   View,
 } from 'react-native';
 import Svg, {Circle, Defs, Ellipse, Path, RadialGradient, Rect, Stop} from 'react-native-svg';
+import {SafeAreaProvider, useSafeAreaInsets} from 'react-native-safe-area-context';
+import LoginScreen from './src/screens/LoginScreen';
+import RegisterScreen from './src/screens/RegisterScreen';
+import hora, {getScale} from './src/theme';
+// DEV PREVIEW — delete this line to remove the loading-state preview
+import DevLoadingPreview, {DEV_PREVIEW_ENABLED} from './src/devLoadingPreview';
+import Splash from './src/components/Splash';
+import ReadingLoader from './src/components/ReadingLoader';
+import {useDelayedVisible} from './src/hooks/useDelayedVisible';
 import {
   GoogleSignin,
   statusCodes,
@@ -51,77 +61,15 @@ const COLORS = {
 // Prata is the closest freely licensed didone.
 const SERIF = 'Prata';
 
-type IconProps = {size: number; color: string};
-
-const UserIcon = ({size, color}: IconProps) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24">
-    <Circle cx="12" cy="8" r="3.6" stroke={color} strokeWidth={1.8} fill="none" />
-    <Path
-      d="M5 20c1.2-4 4-5.5 7-5.5s5.8 1.5 7 5.5"
-      stroke={color}
-      strokeWidth={1.8}
-      strokeLinecap="round"
-      fill="none"
-    />
-  </Svg>
-);
-
-const LockIcon = ({size, color}: IconProps) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24">
-    <Path
-      d="M7 10V8a5 5 0 0 1 10 0v2h.6c.8 0 1.4.6 1.4 1.4v7.2c0 .8-.6 1.4-1.4 1.4H6.4c-.8 0-1.4-.6-1.4-1.4v-7.2C5 10.6 5.6 10 6.4 10H7Zm2 0h6V8a3 3 0 0 0-6 0v2Zm3 4a1.4 1.4 0 0 0-.7 2.6V18a.7.7 0 0 0 1.4 0v-1.4A1.4 1.4 0 0 0 12 14Z"
-      fill={color}
-    />
-  </Svg>
-);
-
-const AtIcon = ({size, color}: IconProps) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24">
-    <Circle cx="12" cy="12" r="4" stroke={color} strokeWidth={1.7} fill="none" />
-    <Path
-      d="M16 8v5a2.5 2.5 0 0 0 5 0v-1a9 9 0 1 0-3.6 7.2"
-      stroke={color}
-      strokeWidth={1.7}
-      strokeLinecap="round"
-      fill="none"
-    />
-  </Svg>
-);
-
-const ArrowIcon = ({size, color}: IconProps) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24">
-    <Path
-      d="M4 12h15M13 6l6 6-6 6"
-      stroke={color}
-      strokeWidth={2.6}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      fill="none"
-    />
-  </Svg>
-);
-
-/** Google's four-colour "G" mark. */
-const GoogleIcon = ({size}: {size: number}) => (
-  <Svg width={size} height={size} viewBox="0 0 48 48">
-    <Path
-      fill="#4285F4"
-      d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"
-    />
-    <Path
-      fill="#34A853"
-      d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"
-    />
-    <Path
-      fill="#FBBC05"
-      d="M11.69 28.18C11.25 26.86 11 25.45 11 24s.25-2.86.69-4.18v-5.7H4.34C2.85 17.09 2 20.45 2 24s.85 6.91 2.34 9.88l7.35-5.7z"
-    />
-    <Path
-      fill="#EA4335"
-      d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"
-    />
-  </Svg>
-);
+/** What the transition loader says on the way to each screen. */
+const TRANSITION_COPY: Record<
+  'login' | 'register' | 'profile',
+  {stage: string; sub: string}
+> = {
+  login: {stage: 'Back to login', sub: 'Just a moment'},
+  register: {stage: 'Opening register', sub: 'Just a moment'},
+  profile: {stage: 'Opening HORA', sub: 'Just a moment'},
+};
 
 /** Soft pink-marble backdrop for the profile screen. */
 const MarbleBackground = ({width, height}: {width: number; height: number}) => (
@@ -151,240 +99,6 @@ const MarbleBackground = ({width, height}: {width: number; height: number}) => (
   </View>
 );
 
-/** Pale pink wave flowing in from the top edge. */
-const TopWaves = ({width, height}: {width: number; height: number}) => (
-  <View pointerEvents="none" style={[StyleSheet.absoluteFill, {justifyContent: 'flex-start'}]}>
-    <Svg width={width} height={height} viewBox="0 0 387 190" preserveAspectRatio="none">
-      <Path
-        d="M0,0 L0,130 C70,160 140,96 210,86 C280,76 330,110 387,60 L387,0 Z"
-        fill={COLORS.wavePinkPale}
-      />
-      <Path
-        d="M0,0 L0,96 C80,124 150,62 220,54 C290,46 340,74 387,28 L387,0 Z"
-        fill={COLORS.wavePink}
-      />
-    </Svg>
-  </View>
-);
-
-/** Layered waves along the bottom of the screen. */
-const BottomWaves = ({width, height}: {width: number; height: number}) => (
-  <View pointerEvents="none" style={[StyleSheet.absoluteFill, {justifyContent: 'flex-end'}]}>
-    <Svg width={width} height={height} viewBox="0 0 387 260" preserveAspectRatio="none">
-      <Path
-        d="M0,260 L0,190 C90,150 150,215 240,175 C310,145 350,90 387,80 L387,260 Z"
-        fill={COLORS.waveLavenderPale}
-      />
-      <Path
-        d="M0,260 L0,235 C110,200 180,250 270,208 C330,180 360,140 387,132 L387,260 Z"
-        fill={COLORS.waveLavender}
-      />
-    </Svg>
-  </View>
-);
-
-type FieldProps = {
-  icon: 'user' | 'lock' | 'at';
-  placeholder: string;
-  secure?: boolean;
-  email?: boolean;
-  scale: number;
-  last?: boolean;
-};
-
-const Field = ({icon, placeholder, secure, email, scale, last}: FieldProps) => {
-  const s = (n: number) => n * scale;
-  const Icon = icon === 'user' ? UserIcon : icon === 'lock' ? LockIcon : AtIcon;
-  return (
-    <View>
-      <View style={[styles.fieldRow, {gap: s(14), paddingVertical: s(10)}]}>
-        <Icon size={s(21)} color={COLORS.gold} />
-        <TextInput
-          placeholder={placeholder}
-          placeholderTextColor={COLORS.ink}
-          secureTextEntry={secure}
-          keyboardType={email ? 'email-address' : 'default'}
-          autoCapitalize="none"
-          style={[
-            styles.input,
-            {
-              fontSize: secure ? s(18) : s(21),
-              letterSpacing: secure ? s(2) : s(0.4),
-            },
-          ]}
-        />
-      </View>
-      {!last && (
-        <View style={[styles.rule, {height: s(2), width: '78%', borderRadius: s(2)}]} />
-      )}
-    </View>
-  );
-};
-
-type GoogleButtonProps = {
-  onPress: () => void;
-  busy: boolean;
-  scale: number;
-  top: number;
-};
-
-/** "Continue with Google", styled to sit inside the cream/gold palette. */
-const GoogleButton = ({onPress, busy, scale, top}: GoogleButtonProps) => {
-  const s = (n: number) => n * scale;
-  return (
-    <Pressable
-      onPress={onPress}
-      disabled={busy}
-      style={({pressed}) => [
-        styles.googleBtn,
-        {
-          top,
-          left: s(40),
-          right: s(40),
-          borderRadius: s(30),
-          paddingVertical: s(15),
-          gap: s(12),
-          borderWidth: s(1.4),
-          opacity: busy ? 0.6 : pressed ? 0.88 : 1,
-          transform: [{scale: pressed ? 0.98 : 1}],
-        },
-      ]}>
-      {busy ? (
-        <ActivityIndicator size="small" color={COLORS.gold} />
-      ) : (
-        <GoogleIcon size={s(22)} />
-      )}
-      <Text style={{fontFamily: SERIF, fontSize: s(17), color: COLORS.ink}}>
-        {busy ? 'Signing in…' : 'Continue with Google'}
-      </Text>
-    </Pressable>
-  );
-};
-
-type ScreenProps = {
-  variant: 'login' | 'register';
-  onSwitch: () => void;
-  onEnter: () => void;
-  onGoogle: () => void;
-  googleBusy: boolean;
-  scale: number;
-  screenH: number;
-};
-
-const AuthScreen = ({
-  variant,
-  onSwitch,
-  onEnter,
-  onGoogle,
-  googleBusy,
-  scale,
-  screenH,
-}: ScreenProps) => {
-  const s = (n: number) => n * scale;
-  const isLogin = variant === 'login';
-
-  return (
-    <View style={StyleSheet.absoluteFill}>
-      {/* switch link, top right */}
-      <Pressable
-        onPress={onSwitch}
-        hitSlop={12}
-        style={{position: 'absolute', top: s(76), right: s(36)}}>
-        <Text style={{fontFamily: SERIF, fontSize: s(19), color: COLORS.gold}}>
-          {isLogin ? 'Register' : 'Log in'}
-        </Text>
-      </Pressable>
-
-      {/* title */}
-      <Text
-        style={{
-          position: 'absolute',
-          top: s(132),
-          left: 0,
-          right: 0,
-          textAlign: 'center',
-          fontFamily: SERIF,
-          fontSize: s(66),
-          color: COLORS.ink,
-        }}>
-        {isLogin ? 'Login' : 'Register'}
-      </Text>
-
-      {/* neumorphic input card, bleeding off the left edge */}
-      <View
-        style={[
-          styles.card,
-          {
-            top: isLogin ? s(292) : s(272),
-            left: s(-48),
-            width: s(322),
-            borderTopRightRadius: s(85),
-            borderBottomRightRadius: s(85),
-            paddingVertical: s(38),
-            paddingRight: s(36),
-            paddingLeft: s(84),
-          },
-        ]}>
-        <Field icon="user" placeholder="Username" scale={scale} />
-        <Field
-          icon="lock"
-          placeholder={isLogin ? '•••••••••••••' : 'Password'}
-          secure
-          scale={scale}
-          last={isLogin}
-        />
-        {!isLogin && <Field icon="at" placeholder="Email" email scale={scale} last />}
-      </View>
-
-      {/* lavender arrow button */}
-      <Pressable
-        onPress={onEnter}
-        style={({pressed}) => [
-          styles.go,
-          {
-            top: s(isLogin ? 348 : 352),
-            right: s(30),
-            width: s(100),
-            height: s(100),
-            borderRadius: s(50),
-            transform: [{scale: pressed ? 0.94 : 1}],
-          },
-        ]}>
-        <ArrowIcon size={s(42)} color="#FFFFFF" />
-      </Pressable>
-
-      {/* google sign-in, in the gap between the card and the try-now pill */}
-      <GoogleButton
-        onPress={onGoogle}
-        busy={googleBusy}
-        scale={scale}
-        top={screenH * 0.615}
-      />
-
-      {/* try now pill */}
-      <Pressable
-        onPress={onEnter}
-        style={({pressed}) => [
-          styles.tryPill,
-          {
-            top: screenH * 0.72,
-            left: s(-42),
-            borderTopRightRadius: s(60),
-            borderBottomRightRadius: s(60),
-            paddingVertical: s(22),
-            paddingLeft: s(80),
-            paddingRight: s(52),
-            transform: [{translateX: pressed ? s(4) : 0}],
-          },
-        ]}>
-        <Text style={{fontFamily: SERIF, fontSize: s(26), color: COLORS.lavender}}>
-          Try now
-        </Text>
-      </Pressable>
-    </View>
-  );
-};
-
 type GoogleProfile = {
   name: string | null;
   email: string;
@@ -404,6 +118,7 @@ const YEARS = Array.from({length: 100}, (_, i) => String(new Date().getFullYear(
 
 const ProfileScreen = ({onLogout, onAction, scale, googleUser}: ProfileProps) => {
   const s = (n: number) => n * scale;
+  const insets = useSafeAreaInsets();
   const [name, setName] = useState(googleUser?.name ?? '');
   const [month, setMonth] = useState('');
   const [day, setDay] = useState('');
@@ -417,21 +132,42 @@ const ProfileScreen = ({onLogout, onAction, scale, googleUser}: ProfileProps) =>
     openPicker === 'Month' ? setMonth : openPicker === 'Day' ? setDay : setYear;
 
   return (
-    <View style={StyleSheet.absoluteFill}>
-      <Pressable onPress={onLogout} hitSlop={12} style={{position: 'absolute', top: s(50), right: s(30)}}>
-        <Text style={{fontFamily: SERIF, fontSize: s(16), color: COLORS.gold}}>
-          {googleUser ? 'Sign out' : 'Back'}
-        </Text>
-      </Pressable>
+    <KeyboardAvoidingView
+      style={styles.flex}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <ScrollView
+        contentContainerStyle={{
+          paddingTop: insets.top + s(12),
+          paddingBottom: insets.bottom + s(32),
+        }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}>
+        <Pressable
+          onPress={onLogout}
+          hitSlop={12}
+          accessibilityRole="button"
+          accessibilityLabel={googleUser ? 'Sign out' : 'Go back'}
+          style={{alignSelf: 'flex-end', paddingRight: s(30), paddingVertical: s(8)}}>
+          <Text style={{fontFamily: SERIF, fontSize: s(16), color: COLORS.gold}}>
+            {googleUser ? 'Sign out' : 'Back'}
+          </Text>
+        </Pressable>
 
-      {/* avatar — the Google photo when signed in, else the drawn placeholder */}
-      <Pressable
-        onPress={() =>
-          onAction(
-            googleUser ? `Signed in as ${googleUser.email}` : 'Photo picker coming soon',
-          )
-        }
-        style={{position: 'absolute', top: s(108), alignSelf: 'center', width: avatarSize, height: avatarSize}}>
+        {/* avatar — the Google photo when signed in, else the drawn placeholder */}
+        <Pressable
+          onPress={() =>
+            onAction(
+              googleUser ? `Signed in as ${googleUser.email}` : 'Photo picker coming soon',
+            )
+          }
+          accessibilityRole="button"
+          accessibilityLabel="Profile photo"
+          style={{
+            alignSelf: 'center',
+            marginTop: s(20),
+            width: avatarSize,
+            height: avatarSize,
+          }}>
         {googleUser?.photo ? (
           <Image
             source={{uri: googleUser.photo}}
@@ -453,52 +189,47 @@ const ProfileScreen = ({onLogout, onAction, scale, googleUser}: ProfileProps) =>
         )}
       </Pressable>
 
-      <Text
-        style={{
-          position: 'absolute',
-          top: s(292),
-          left: s(30),
-          right: s(30),
-          textAlign: 'center',
-          fontFamily: SERIF,
-          fontSize: s(30),
-          color: COLORS.avatarTan,
-        }}
-        numberOfLines={1}
-        adjustsFontSizeToFit>
-        {name.trim() ? `Hello, ${name.trim()}` : 'Hello, ...'}
-      </Text>
-
-      {googleUser && (
         <Text
           style={{
-            position: 'absolute',
-            top: s(336),
-            left: s(30),
-            right: s(30),
+            marginTop: s(26),
+            paddingHorizontal: s(30),
             textAlign: 'center',
             fontFamily: SERIF,
-            fontSize: s(14),
-            color: COLORS.gold,
+            fontSize: s(30),
+            color: COLORS.avatarTan,
           }}
-          numberOfLines={1}>
-          {googleUser.email}
+          numberOfLines={1}
+          adjustsFontSizeToFit>
+          {name.trim() ? `Hello, ${name.trim()}` : 'Hello, ...'}
         </Text>
-      )}
 
-      {/* name pill */}
-      <View
-        style={[
-          styles.namePill,
-          {
-            top: s(376),
-            left: s(34),
-            right: s(34),
-            borderRadius: s(22),
-            paddingVertical: s(14),
-            paddingHorizontal: s(24),
-          },
-        ]}>
+        {googleUser && (
+          <Text
+            style={{
+              marginTop: s(6),
+              paddingHorizontal: s(30),
+              textAlign: 'center',
+              fontFamily: SERIF,
+              fontSize: s(14),
+              color: COLORS.gold,
+            }}
+            numberOfLines={1}>
+            {googleUser.email}
+          </Text>
+        )}
+
+        {/* name pill */}
+        <View
+          style={[
+            styles.namePill,
+            {
+              marginTop: s(26),
+              marginHorizontal: s(34),
+              borderRadius: s(22),
+              paddingVertical: s(14),
+              paddingHorizontal: s(24),
+            },
+          ]}>
         <TextInput
           value={name}
           onChangeText={setName}
@@ -516,19 +247,18 @@ const ProfileScreen = ({onLogout, onAction, scale, googleUser}: ProfileProps) =>
         <View style={[styles.rule, {height: s(1.5), width: '70%', alignSelf: 'center', marginTop: s(6)}]} />
       </View>
 
-      {/* date of birth card */}
-      <View
-        style={[
-          styles.dobCard,
-          {
-            top: s(486),
-            left: s(26),
-            right: s(26),
-            borderRadius: s(28),
-            paddingVertical: s(28),
-            paddingHorizontal: s(22),
-          },
-        ]}>
+        {/* date of birth card */}
+        <View
+          style={[
+            styles.dobCard,
+            {
+              marginTop: s(30),
+              marginHorizontal: s(26),
+              borderRadius: s(28),
+              paddingVertical: s(28),
+              paddingHorizontal: s(22),
+            },
+          ]}>
         <Text
           style={{
             fontFamily: SERIF,
@@ -639,13 +369,16 @@ const ProfileScreen = ({onLogout, onAction, scale, googleUser}: ProfileProps) =>
           </View>
         </Pressable>
       </Modal>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
-export default function App() {
+function AppInner() {
   const {width, height} = useWindowDimensions();
-  const scale = width / 375;
+  // Clamped: raw width/375 produced a 131px title and pushed content far below
+  // the fold on tablets, and cramped it on an iPhone SE.
+  const scale = getScale(width);
 
   const [screen, setScreen] = useState<'login' | 'register' | 'profile'>('login');
   const fade = useRef(new Animated.Value(1)).current;
@@ -656,9 +389,59 @@ export default function App() {
 
   const [googleUser, setGoogleUser] = useState<GoogleProfile | null>(null);
   const [googleBusy, setGoogleBusy] = useState(false);
+  /** Cold start: hold the splash until we know whether a session exists. */
+  const [bootstrapping, setBootstrapping] = useState(true);
+  /**
+   * Loading screen used as the transition into the app. Unlike a network call,
+   * a transition has a known duration, so the bar tracks elapsed time honestly
+   * rather than guessing at unknown work.
+   */
+  const [transition, setTransition] = useState<{
+    target: 'login' | 'register' | 'profile';
+    progress: number;
+  } | null>(null);
+  const transitionTarget = transition?.target;
+
+  useEffect(() => {
+    if (!transitionTarget) {
+      return;
+    }
+    const started = Date.now();
+    const DURATION = 900;
+    const id = setInterval(() => {
+      const pct = Math.min(100, ((Date.now() - started) / DURATION) * 100);
+      if (pct >= 100) {
+        clearInterval(id);
+        setScreen(transitionTarget);
+        setTransition(null);
+      } else {
+        setTransition(t => (t ? {...t, progress: pct} : t));
+      }
+    }, 50);
+    return () => clearInterval(id);
+  }, [transitionTarget]);
+
+  /** Milestones from the real sign-in call, not a timer. */
+  const [signInStage, setSignInStage] = useState({stage: '', progress: 0});
+  const [signInError, setSignInError] = useState<string | undefined>();
+  const [signInSlow, setSignInSlow] = useState(false);
+
+  // Under 300ms the loader never appears, so a fast sign-in does not flash.
+  const showSignInLoader = useDelayedVisible(googleBusy, 300);
+
+  // Past 2.5s the copy becomes honest about the wait; progress is untouched.
+  useEffect(() => {
+    if (!googleBusy) {
+      setSignInSlow(false);
+      return;
+    }
+    const t = setTimeout(() => setSignInSlow(true), 2500);
+    return () => clearTimeout(t);
+  }, [googleBusy]);
 
   useEffect(() => {
     if (!isGoogleConfigured()) {
+      setBootstrapping(false);
       return;
     }
     // webClientId is only sent when an idToken is actually wanted; requesting one
@@ -676,14 +459,13 @@ export default function App() {
           setScreen('profile');
         }
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setBootstrapping(false));
   }, []);
 
+  /** Every navigation runs through the loading screen. */
   const goTo = (target: 'login' | 'register' | 'profile') => {
-    Animated.timing(fade, {toValue: 0, duration: 200, useNativeDriver: true}).start(() => {
-      setScreen(target);
-      Animated.timing(fade, {toValue: 1, duration: 260, useNativeDriver: true}).start();
-    });
+    setTransition({target, progress: 0});
   };
 
   const showToast = (msg: string) => {
@@ -702,10 +484,16 @@ export default function App() {
       showToast('Add your Web client ID to googleAuthConfig.ts');
       return;
     }
+    setSignInError(undefined);
     setGoogleBusy(true);
+    // Each setSignInStage marks a real step completing — no interpolation and
+    // no timer nudging the bar along.
+    setSignInStage({stage: 'Checking Google Play Services', progress: 10});
     try {
       await GoogleSignin.hasPlayServices({showPlayServicesUpdateDialog: true});
+      setSignInStage({stage: 'Waiting for you to choose an account', progress: 40});
       const res = await GoogleSignin.signIn();
+      setSignInStage({stage: 'Finishing sign in', progress: 85});
       if (res.type === 'success') {
         setGoogleUser(res.data.user);
         goTo('profile');
@@ -722,7 +510,9 @@ export default function App() {
         showToast('Sign-in cancelled');
       } else {
         // DEVELOPER_ERROR lands here: SHA-1 / package name / client ID mismatch.
-        showToast(`Sign-in failed${code ? ` (${code})` : ''}`);
+        // A loader must never be left spinning with no way out, so this becomes
+        // the failure screen with a retry rather than a toast that vanishes.
+        setSignInError("We couldn't sign you in");
         console.warn('[GoogleSignIn]', err);
       }
     } finally {
@@ -742,11 +532,55 @@ export default function App() {
     goTo('login');
   };
 
+  const screenBg =
+    screen === 'profile'
+      ? COLORS.marbleBase
+      : screen === 'login'
+      ? hora.surface.screen
+      : COLORS.screenBg;
+
+  // Cold start — no measurable progress to show, so the splash stays inert.
+  if (bootstrapping) {
+    return <Splash />;
+  }
+
+  if (transition) {
+    return (
+      <ReadingLoader
+        progress={transition.progress}
+        stage={TRANSITION_COPY[transition.target].stage}
+        stageSub={TRANSITION_COPY[transition.target].sub}
+      />
+    );
+  }
+
+  // Held open on failure too, so the error and its retry are reachable.
+  if (showSignInLoader || signInError) {
+    return (
+      <ReadingLoader
+        progress={signInStage.progress}
+        stage={signInSlow ? 'Taking longer than usual' : signInStage.stage}
+        stageSub={signInSlow ? 'Still working — you can keep waiting' : undefined}
+        error={signInError}
+        onRetry={() => {
+          setSignInError(undefined);
+          handleGoogleSignIn();
+        }}
+      />
+    );
+  }
+
   return (
-    <View style={{flex: 1, backgroundColor: screen === 'profile' ? COLORS.marbleBase : COLORS.screenBg}}>
+    <View style={{flex: 1, backgroundColor: screenBg}}>
       <StatusBar
         barStyle="dark-content"
-        backgroundColor={screen === 'profile' ? COLORS.marbleBase : COLORS.wavePink}
+        backgroundColor={
+          screen === 'profile'
+            ? COLORS.marbleBase
+            : screen === 'login'
+            ? hora.surface.waveFront
+            : COLORS.wavePink
+        }
       />
       <Animated.View style={[StyleSheet.absoluteFill, {opacity: fade}]}>
         {screen === 'profile' ? (
@@ -760,20 +594,27 @@ export default function App() {
               googleUser={googleUser}
             />
           </>
+        ) : screen === 'login' ? (
+          <LoginScreen
+            onSubmit={(username: string) => {
+              showToast(`Welcome, ${username}`);
+              goTo('profile');
+            }}
+            onGoogle={handleGoogleSignIn}
+            onRegister={() => goTo('register')}
+            onGuest={() => goTo('profile')}
+            googleBusy={googleBusy}
+          />
         ) : (
-          <>
-            <TopWaves width={width} height={190 * scale} />
-            <BottomWaves width={width} height={260 * scale} />
-            <AuthScreen
-              variant={screen}
-              onSwitch={() => goTo(screen === 'login' ? 'register' : 'login')}
-              onEnter={() => goTo('profile')}
-              onGoogle={handleGoogleSignIn}
-              googleBusy={googleBusy}
-              scale={scale}
-              screenH={height}
-            />
-          </>
+          <RegisterScreen
+            onSubmit={(mail: string) => {
+              showToast(`Welcome, ${mail}`);
+              goTo('profile');
+            }}
+            onGoogle={handleGoogleSignIn}
+            onLogin={() => goTo('login')}
+            googleBusy={googleBusy}
+          />
         )}
       </Animated.View>
 
@@ -804,24 +645,33 @@ export default function App() {
   );
 }
 
+// LoginScreen reads useSafeAreaInsets(), which needs a provider above it.
+export default function App() {
+  // DEV PREVIEW — delete this block to remove the loading-state preview
+  if (DEV_PREVIEW_ENABLED) {
+    return (
+      <SafeAreaProvider>
+        <DevLoadingPreview />
+      </SafeAreaProvider>
+    );
+  }
+
+  return (
+    <SafeAreaProvider>
+      <AppInner />
+    </SafeAreaProvider>
+  );
+}
+
 const styles = StyleSheet.create({
-  fieldRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  input: {
-    flex: 1,
-    fontFamily: SERIF,
-    color: COLORS.ink,
-    paddingVertical: 0,
-  },
   rule: {
     backgroundColor: COLORS.goldSoft,
     opacity: 0.55,
     marginBottom: 2,
   },
+  flex: {flex: 1},
   card: {
-    position: 'absolute',
+    flex: 1,
     backgroundColor: COLORS.card,
     shadowColor: '#85755C',
     shadowOffset: {width: 14, height: 18},
@@ -830,10 +680,11 @@ const styles = StyleSheet.create({
     elevation: 12,
   },
   go: {
-    position: 'absolute',
     backgroundColor: COLORS.lavender,
     alignItems: 'center',
     justifyContent: 'center',
+    // must out-elevate the card or Android paints it underneath
+    zIndex: 2,
     shadowColor: '#786EA0',
     shadowOffset: {width: 10, height: 14},
     shadowOpacity: 0.38,
@@ -841,7 +692,7 @@ const styles = StyleSheet.create({
     elevation: 14,
   },
   tryPill: {
-    position: 'absolute',
+    alignSelf: 'flex-start',
     backgroundColor: COLORS.card,
     shadowColor: '#85755C',
     shadowOffset: {width: 10, height: 12},
@@ -855,7 +706,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.ink,
   },
   googleBtn: {
-    position: 'absolute',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -868,7 +718,6 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   namePill: {
-    position: 'absolute',
     backgroundColor: COLORS.card,
     shadowColor: '#85755C',
     shadowOffset: {width: 14, height: 18},
@@ -877,7 +726,6 @@ const styles = StyleSheet.create({
     elevation: 12,
   },
   dobCard: {
-    position: 'absolute',
     backgroundColor: COLORS.card,
     shadowColor: '#85755C',
     shadowOffset: {width: 14, height: 18},
