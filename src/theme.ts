@@ -69,6 +69,12 @@ export const theme = {
   font: {
     /** Display only — never below 20px. Cormorant is too light to hold at small sizes. */
     display: 'CormorantGaramond-SemiBold',
+    /**
+     * The large onboarding questions. Family name carries the weight — never
+     * pair this with fontWeight, or Android stacks a synthetic bold on top of
+     * the real one and the letterforms smear.
+     */
+    displayBold: 'CormorantGaramond-Bold',
     body: 'Kodchasan-Regular',
     bodyMedium: 'Kodchasan-Medium',
     bodySemi: 'Kodchasan-SemiBold',

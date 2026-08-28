@@ -20,6 +20,13 @@ import Skeleton from './components/Skeleton';
 
 export const DEV_PREVIEW_ENABLED = false;
 
+/**
+ * TEMPORARY — jump straight into the profile setup flow without signing up.
+ * Set to false, or delete this constant plus the `DEV PROFILE SETUP` block in
+ * App.tsx, to remove it.
+ */
+export const DEV_PROFILE_SETUP = false;
+
 type State = 'splash' | 'reading' | 'skeleton' | 'error';
 const ORDER: State[] = ['splash', 'reading', 'skeleton', 'error'];
 

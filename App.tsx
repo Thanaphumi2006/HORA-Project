@@ -6,26 +6,23 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {
   Animated,
-  Image,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  Pressable,
-  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
-  TextInput,
   useWindowDimensions,
   View,
 } from 'react-native';
-import Svg, {Circle, Defs, Ellipse, Path, RadialGradient, Rect, Stop} from 'react-native-svg';
-import {SafeAreaProvider, useSafeAreaInsets} from 'react-native-safe-area-context';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
+import ProfileSetup, {type Profile} from './src/screens/onboarding/ProfileSetup';
+import SetupComplete from './src/screens/onboarding/SetupComplete';
 import hora, {getScale} from './src/theme';
 // DEV PREVIEW — delete this line to remove the loading-state preview
-import DevLoadingPreview, {DEV_PREVIEW_ENABLED} from './src/devLoadingPreview';
+import DevLoadingPreview, {
+  DEV_PREVIEW_ENABLED,
+  DEV_PROFILE_SETUP,
+} from './src/devLoadingPreview';
 import Splash from './src/components/Splash';
 import ReadingLoader from './src/components/ReadingLoader';
 import {useDelayedVisible} from './src/hooks/useDelayedVisible';
@@ -63,41 +60,14 @@ const SERIF = 'Prata';
 
 /** What the transition loader says on the way to each screen. */
 const TRANSITION_COPY: Record<
-  'login' | 'register' | 'profile',
+  'login' | 'register' | 'profile' | 'done',
   {stage: string; sub: string}
 > = {
+  done: {stage: 'Opening HORA', sub: 'Just a moment'},
   login: {stage: 'Back to login', sub: 'Just a moment'},
   register: {stage: 'Opening register', sub: 'Just a moment'},
   profile: {stage: 'Opening HORA', sub: 'Just a moment'},
 };
-
-/** Soft pink-marble backdrop for the profile screen. */
-const MarbleBackground = ({width, height}: {width: number; height: number}) => (
-  <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-    <Svg width={width} height={height}>
-      <Defs>
-        <RadialGradient id="blush" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor={COLORS.marbleBlush} stopOpacity="0.9" />
-          <Stop offset="100%" stopColor={COLORS.marbleBlush} stopOpacity="0" />
-        </RadialGradient>
-        <RadialGradient id="mauve" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor={COLORS.marbleMauve} stopOpacity="0.85" />
-          <Stop offset="100%" stopColor={COLORS.marbleMauve} stopOpacity="0" />
-        </RadialGradient>
-        <RadialGradient id="glow" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.9" />
-          <Stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
-        </RadialGradient>
-      </Defs>
-      <Rect x="0" y="0" width={width} height={height} fill={COLORS.marbleBase} />
-      <Ellipse cx={width * 0.15} cy={height * 0.08} rx={width * 0.7} ry={height * 0.28} fill="url(#blush)" />
-      <Ellipse cx={width * 0.9} cy={height * 0.22} rx={width * 0.6} ry={height * 0.24} fill="url(#mauve)" />
-      <Ellipse cx={width * 0.5} cy={height * 0.5} rx={width * 0.75} ry={height * 0.3} fill="url(#glow)" />
-      <Ellipse cx={width * 0.1} cy={height * 0.78} rx={width * 0.6} ry={height * 0.26} fill="url(#blush)" />
-      <Ellipse cx={width * 0.95} cy={height * 0.95} rx={width * 0.65} ry={height * 0.25} fill="url(#mauve)" />
-    </Svg>
-  </View>
-);
 
 type GoogleProfile = {
   name: string | null;
@@ -105,282 +75,13 @@ type GoogleProfile = {
   photo: string | null;
 };
 
-type ProfileProps = {
-  onLogout: () => void;
-  onAction: (msg: string) => void;
-  scale: number;
-  googleUser: GoogleProfile | null;
-};
-
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const DAYS = Array.from({length: 31}, (_, i) => String(i + 1));
-const YEARS = Array.from({length: 100}, (_, i) => String(new Date().getFullYear() - i));
-
-const ProfileScreen = ({onLogout, onAction, scale, googleUser}: ProfileProps) => {
-  const s = (n: number) => n * scale;
-  const insets = useSafeAreaInsets();
-  const [name, setName] = useState(googleUser?.name ?? '');
-  const [month, setMonth] = useState('');
-  const [day, setDay] = useState('');
-  const [year, setYear] = useState('');
-  const [openPicker, setOpenPicker] = useState<'Month' | 'Day' | 'Year' | null>(null);
-  const avatarSize = s(150);
-
-  const pickerOptions =
-    openPicker === 'Month' ? MONTHS : openPicker === 'Day' ? DAYS : YEARS;
-  const setPicked =
-    openPicker === 'Month' ? setMonth : openPicker === 'Day' ? setDay : setYear;
-
-  return (
-    <KeyboardAvoidingView
-      style={styles.flex}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView
-        contentContainerStyle={{
-          paddingTop: insets.top + s(12),
-          paddingBottom: insets.bottom + s(32),
-        }}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}>
-        <Pressable
-          onPress={onLogout}
-          hitSlop={12}
-          accessibilityRole="button"
-          accessibilityLabel={googleUser ? 'Sign out' : 'Go back'}
-          style={{alignSelf: 'flex-end', paddingRight: s(30), paddingVertical: s(8)}}>
-          <Text style={{fontFamily: SERIF, fontSize: s(16), color: COLORS.gold}}>
-            {googleUser ? 'Sign out' : 'Back'}
-          </Text>
-        </Pressable>
-
-        {/* avatar — the Google photo when signed in, else the drawn placeholder */}
-        <Pressable
-          onPress={() =>
-            onAction(
-              googleUser ? `Signed in as ${googleUser.email}` : 'Photo picker coming soon',
-            )
-          }
-          accessibilityRole="button"
-          accessibilityLabel="Profile photo"
-          style={{
-            alignSelf: 'center',
-            marginTop: s(20),
-            width: avatarSize,
-            height: avatarSize,
-          }}>
-        {googleUser?.photo ? (
-          <Image
-            source={{uri: googleUser.photo}}
-            style={{
-              width: avatarSize,
-              height: avatarSize,
-              borderRadius: avatarSize / 2,
-              borderWidth: s(4),
-              borderColor: COLORS.avatarTan,
-            }}
-          />
-        ) : (
-          <Svg width={avatarSize} height={avatarSize} viewBox="0 0 150 150">
-            <Circle cx="75" cy="75" r="72" stroke={COLORS.avatarTan} strokeWidth="4" fill="none" />
-            <Circle cx="75" cy="58" r="26" fill={COLORS.avatarTan} />
-            <Path d="M27 122 C36 90 55 80 75 80 C95 80 114 90 123 122 A72 72 0 0 1 27 122 Z" fill={COLORS.avatarTan} />
-            <Path d="M137 122 v22 M126 133 h22" stroke={COLORS.avatarTan} strokeWidth="7" strokeLinecap="round" />
-          </Svg>
-        )}
-      </Pressable>
-
-        <Text
-          style={{
-            marginTop: s(26),
-            paddingHorizontal: s(30),
-            textAlign: 'center',
-            fontFamily: SERIF,
-            fontSize: s(30),
-            color: COLORS.avatarTan,
-          }}
-          numberOfLines={1}
-          adjustsFontSizeToFit>
-          {name.trim() ? `Hello, ${name.trim()}` : 'Hello, ...'}
-        </Text>
-
-        {googleUser && (
-          <Text
-            style={{
-              marginTop: s(6),
-              paddingHorizontal: s(30),
-              textAlign: 'center',
-              fontFamily: SERIF,
-              fontSize: s(14),
-              color: COLORS.gold,
-            }}
-            numberOfLines={1}>
-            {googleUser.email}
-          </Text>
-        )}
-
-        {/* name pill */}
-        <View
-          style={[
-            styles.namePill,
-            {
-              marginTop: s(26),
-              marginHorizontal: s(34),
-              borderRadius: s(22),
-              paddingVertical: s(14),
-              paddingHorizontal: s(24),
-            },
-          ]}>
-        <TextInput
-          value={name}
-          onChangeText={setName}
-          placeholder="Enter your name"
-          placeholderTextColor={COLORS.gold}
-          autoCapitalize="words"
-          style={{
-            fontFamily: SERIF,
-            fontSize: s(16),
-            color: COLORS.ink,
-            textAlign: 'center',
-            paddingVertical: 0,
-          }}
-        />
-        <View style={[styles.rule, {height: s(1.5), width: '70%', alignSelf: 'center', marginTop: s(6)}]} />
-      </View>
-
-        {/* date of birth card */}
-        <View
-          style={[
-            styles.dobCard,
-            {
-              marginTop: s(30),
-              marginHorizontal: s(26),
-              borderRadius: s(28),
-              paddingVertical: s(28),
-              paddingHorizontal: s(22),
-            },
-          ]}>
-        <Text
-          style={{
-            fontFamily: SERIF,
-            fontSize: s(26),
-            lineHeight: s(34),
-            color: COLORS.avatarTan,
-            textAlign: 'center',
-          }}>
-          Enter your{'\n'}Date of birth
-        </Text>
-
-        <View style={{flexDirection: 'row', gap: s(12), marginTop: s(24)}}>
-          {[
-            {ph: 'Month' as const, val: month},
-            {ph: 'Day' as const, val: day},
-            {ph: 'Year' as const, val: year},
-          ].map(f => (
-            <Pressable
-              key={f.ph}
-              onPress={() => setOpenPicker(f.ph)}
-              style={({pressed}) => [
-                styles.dobBox,
-                {
-                  borderRadius: s(12),
-                  borderWidth: s(1.6),
-                  paddingVertical: s(12),
-                  backgroundColor: pressed ? 'rgba(169,162,212,0.18)' : 'rgba(255,255,255,0.55)',
-                },
-              ]}>
-              <Text
-                style={{
-                  fontFamily: SERIF,
-                  fontSize: s(15),
-                  color: f.val ? COLORS.ink : COLORS.gold,
-                  textAlign: 'center',
-                }}>
-                {f.val || f.ph}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-
-        <Pressable
-          onPress={() =>
-            onAction(name.trim() ? `Welcome, ${name.trim()}` : 'Please enter your name')
-          }
-          style={({pressed}) => [
-            styles.continueBtn,
-            {
-              marginTop: s(20),
-              borderRadius: s(10),
-              paddingVertical: s(13),
-              opacity: pressed ? 0.85 : 1,
-            },
-          ]}>
-          <Text style={{fontFamily: SERIF, fontSize: s(16), color: '#FFFFFF', textAlign: 'center'}}>
-            Continue
-          </Text>
-        </Pressable>
-      </View>
-
-      {/* dropdown picker */}
-      <Modal
-        visible={openPicker !== null}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setOpenPicker(null)}>
-        <Pressable style={styles.pickerOverlay} onPress={() => setOpenPicker(null)}>
-          <View
-            style={[
-              styles.pickerSheet,
-              {borderRadius: s(24), paddingVertical: s(18), width: s(220), maxHeight: s(400)},
-            ]}>
-            <Text
-              style={{
-                fontFamily: SERIF,
-                fontSize: s(20),
-                color: COLORS.avatarTan,
-                textAlign: 'center',
-                marginBottom: s(10),
-              }}>
-              {openPicker}
-            </Text>
-            <ScrollView>
-              {pickerOptions.map(opt => (
-                <Pressable
-                  key={opt}
-                  onPress={() => {
-                    setPicked(opt);
-                    setOpenPicker(null);
-                  }}
-                  style={({pressed}) => ({
-                    paddingVertical: s(11),
-                    backgroundColor: pressed ? 'rgba(169,162,212,0.25)' : 'transparent',
-                  })}>
-                  <Text
-                    style={{
-                      fontFamily: SERIF,
-                      fontSize: s(17),
-                      color: COLORS.ink,
-                      textAlign: 'center',
-                    }}>
-                    {opt}
-                  </Text>
-                </Pressable>
-              ))}
-            </ScrollView>
-          </View>
-        </Pressable>
-      </Modal>
-      </ScrollView>
-    </KeyboardAvoidingView>
-  );
-};
-
 function AppInner() {
-  const {width, height} = useWindowDimensions();
+  const {width} = useWindowDimensions();
   // Clamped: raw width/375 produced a 131px title and pushed content far below
   // the fold on tablets, and cramped it on an iPhone SE.
   const scale = getScale(width);
 
-  const [screen, setScreen] = useState<'login' | 'register' | 'profile'>('login');
+  const [screen, setScreen] = useState<'login' | 'register' | 'profile' | 'done'>('login');
   const fade = useRef(new Animated.Value(1)).current;
 
   const [toast, setToast] = useState('');
@@ -388,6 +89,8 @@ function AppInner() {
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [googleUser, setGoogleUser] = useState<GoogleProfile | null>(null);
+  /** Completed onboarding answers. Lives here because there is no store yet. */
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [googleBusy, setGoogleBusy] = useState(false);
   /** Cold start: hold the splash until we know whether a session exists. */
   const [bootstrapping, setBootstrapping] = useState(true);
@@ -397,7 +100,7 @@ function AppInner() {
    * rather than guessing at unknown work.
    */
   const [transition, setTransition] = useState<{
-    target: 'login' | 'register' | 'profile';
+    target: 'login' | 'register' | 'profile' | 'done';
     progress: number;
   } | null>(null);
   const transitionTarget = transition?.target;
@@ -464,7 +167,7 @@ function AppInner() {
   }, []);
 
   /** Every navigation runs through the loading screen. */
-  const goTo = (target: 'login' | 'register' | 'profile') => {
+  const goTo = (target: 'login' | 'register' | 'profile' | 'done') => {
     setTransition({target, progress: 0});
   };
 
@@ -520,7 +223,12 @@ function AppInner() {
     }
   };
 
-  const handleLogout = async () => {
+  const handleProfileComplete = (p: Profile) => {
+    setProfile(p);
+    goTo('done');
+  };
+
+  const handleSignOut = async () => {
     if (googleUser) {
       try {
         await GoogleSignin.signOut();
@@ -529,8 +237,10 @@ function AppInner() {
       }
       setGoogleUser(null);
     }
+    setProfile(null);
     goTo('login');
   };
+
 
   const screenBg =
     screen === 'profile'
@@ -583,17 +293,17 @@ function AppInner() {
         }
       />
       <Animated.View style={[StyleSheet.absoluteFill, {opacity: fade}]}>
-        {screen === 'profile' ? (
-          <>
-            <MarbleBackground width={width} height={height} />
-            <ProfileScreen
-              key={googleUser?.email ?? 'guest'}
-              onLogout={handleLogout}
-              onAction={showToast}
-              scale={scale}
-              googleUser={googleUser}
-            />
-          </>
+        {screen === 'done' && profile ? (
+          <SetupComplete
+            profile={profile}
+            email={googleUser?.email}
+            onSignOut={handleSignOut}
+          />
+        ) : screen === 'profile' ? (
+          <ProfileSetup
+            key={googleUser?.email ?? 'guest'}
+            onComplete={handleProfileComplete}
+          />
         ) : screen === 'login' ? (
           <LoginScreen
             onSubmit={(username: string) => {
@@ -647,6 +357,15 @@ function AppInner() {
 
 // LoginScreen reads useSafeAreaInsets(), which needs a provider above it.
 export default function App() {
+  // DEV PROFILE SETUP — delete this block to remove the shortcut
+  if (DEV_PROFILE_SETUP) {
+    return (
+      <SafeAreaProvider>
+        <ProfileSetup onComplete={p => console.log('[dev] profile complete', p)} />
+      </SafeAreaProvider>
+    );
+  }
+
   // DEV PREVIEW — delete this block to remove the loading-state preview
   if (DEV_PREVIEW_ENABLED) {
     return (
